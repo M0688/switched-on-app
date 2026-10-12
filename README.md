@@ -16,7 +16,7 @@ A phone study app (installable PWA) for daily GCSE maths and English practice, b
    Optional: `TUTOR_MODEL`, `MARKING_MODEL`, `TUTOR_DAILY_LIMIT` (default 60), `MARKING_DAILY_LIMIT` (default 6).
 3. In Supabase → Authentication → URL Configuration, set the Site URL to the GitHub Pages address.
 4. The Supabase URL, anon key and push public key live in `src/config.js` (all safe to publish).
-5. In GitHub → Settings → Pages, set Source to **Deploy from a branch**, branch `main`, folder `/docs`. The repository must be called `switched-on`.
+5. In GitHub → Settings → Pages, set Source to **Deploy from a branch**, branch `main`, folder `/docs`. The repository must be called `switched-on-app`.
 
 ## Adding lessons
 Lessons live in `src/content/`. Each session has `id`, `title`, `sub`, `lesson` (HTML) and either `gen()` (one random question) or `make()` (a set of 8). Add new sessions to the end of a subject's list; the daily plan picks them up automatically.
