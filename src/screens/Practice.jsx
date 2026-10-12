@@ -1,0 +1,38 @@
+import React from 'react';
+import { SUBJECTS } from '../content/index.js';
+import { sessionStats } from '../lib/stats.js';
+
+export default function Practice({ data }) {
+  return (
+    <main className="page">
+      <div className="stack" style={{ gap: 4 }}><span className="eyebrow">All subjects</span><h1>Practice</h1>
+        <p className="muted">Lessons unlock in order. Go back to any you've done for extra practice.</p></div>
+      {Object.entries(SUBJECTS).map(([id, subj]) => {
+        const st = sessionStats(subj.sessions, data.attempts, data.writings);
+        const firstOpen = st.findIndex(s => !s.passed);
+        return (
+          <section key={id} className="card">
+            <div className="row"><h2>{subj.name}</h2><span className="spacer" /><span className="muted small">{subj.qual}</span></div>
+            <div className="list">
+              {st.map((s, i) => {
+                const locked = firstOpen !== -1 && i > firstOpen;
+                const href = s.session.writing ? '#/writing' : '#/s/' + s.session.key;
+                const pill = s.passed ? <span className="pill good">Done</span>
+                  : s.best != null ? <span className="pill warn">Best {s.best}/8</span>
+                  : i === firstOpen ? <span className="pill quiet">Up next</span> : null;
+                const inner = (<>
+                  <span className="num muted" style={{ width: '1.4em', fontWeight: 700 }}>{i + 1}</span>
+                  <span className="grow"><b>{s.session.title}</b><br /><span className="muted small">{s.session.sub}</span></span>
+                  {locked ? <span className="muted small">Locked</span> : pill}
+                </>);
+                return locked
+                  ? <div key={s.session.key} className="li" style={{ opacity: .55 }}>{inner}</div>
+                  : <a key={s.session.key} href={href} className="li" style={{ textDecoration: 'none', color: 'inherit' }}>{inner}</a>;
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </main>
+  );
+}
