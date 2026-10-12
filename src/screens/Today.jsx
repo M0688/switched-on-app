@@ -1,8 +1,11 @@
 import React from 'react';
-import { SUBJECTS, ALL, SCHEDULE } from '../content/index.js';
-import { todayPlan, streak, activity, sessionStats, reviewPick, dayKey, isWeekend } from '../lib/stats.js';
+import { SUBJECTS, SCHEDULE } from '../content/index.js';
+import { streak, activity, dayKey } from '../lib/stats.js';
+import { dayPlan, BLOCK_HOURS, PER_DAY, blockLabel } from '../lib/plan.js';
 import { Logo } from '../components/ui.jsx';
 import { supabase } from '../lib/supabase.js';
+import { FishingCard } from '../components/Fishing.jsx';
+import { PushSetup } from './Alerts.jsx';
 
 function greeting() {
   const h = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Europe/London' }).format(new Date()));
@@ -22,13 +25,37 @@ export function StreakCard({ attempts, writings }) {
   );
 }
 
+export function BlockStrip({ plan }) {
+  return (
+    <div className="blocks" role="list" aria-label="Today's study blocks">
+      {BLOCK_HOURS.map((_, i) => {
+        const done = plan.items.length > 0 && plan.items.every(it => it.done > i);
+        const open = i < plan.open;
+        return (
+          <div key={i} role="listitem" className={'blk' + (done ? ' done' : open ? ' open' : '')}>
+            <b>{blockLabel(i)}</b><span>{done ? 'Done' : open ? 'Open now' : 'Locked'}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function Today({ profile, data }) {
   const { attempts, writings } = data;
-  const plan = todayPlan(SUBJECTS, attempts, writings, new Date(), SCHEDULE);
-  const weekend = isWeekend();
-  const allDone = !weekend && plan.every(p => p.doneToday || p.complete);
-  const review = allDone ? reviewPick(sessionStats(ALL, attempts, writings)) : null;
+  const plan = dayPlan(SUBJECTS, SCHEDULE, attempts, writings);
+  const weekend = plan.weekend;
+  const allDone = !weekend && plan.items.length > 0 && plan.items.every(i => i.finished);
+  const waiting = !weekend && !allDone && plan.items.every(i => !i.canStart);
   const latest = writings.find(w => w.status === 'marked');
+  const left = plan.lessonsTotal - plan.lessonsDone;
+
+  let intro;
+  if (weekend) intro = 'It\u2019s the weekend. No lessons today. Enjoy your time off; lessons are back on Monday.';
+  else if (allDone) intro = 'All 3 blocks done today. Brilliant work.';
+  else if (plan.open === 0) intro = `Your first block opens at ${blockLabel(0)}. ${plan.lessonsTotal} lessons today, about 20 minutes each.`;
+  else if (waiting) intro = `Block done. The next one opens at ${blockLabel(plan.open)}.`;
+  else intro = `${plan.lessonsDone} of ${plan.lessonsTotal} lessons done today. ${left} to go.`;
 
   return (
     <main className="page">
@@ -36,33 +63,31 @@ export default function Today({ profile, data }) {
       <div className="stack" style={{ gap: 4 }}>
         <span className="eyebrow">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/London' })}</span>
         <h1>{greeting()}, {profile.display_name}</h1>
-        <p className="muted">{weekend ? 'It\u2019s the weekend. No lessons today. Enjoy your time off; lessons are back on Monday.' : allDone ? 'Today’s work is done. Nice one.' : `${['', 'One', 'Two', 'Three', 'Four', 'Five'][plan.length] ?? plan.length} short lesson${plan.length === 1 ? '' : 's'} today, about 20 minutes each.`}</p>
+        <p className="muted">{intro}</p>
       </div>
 
+      {!weekend && <BlockStrip plan={plan} />}
+      <PushSetup compact student />
+
       <div className="stack" style={{ gap: 10 }}>
-        {plan.map(p => {
-          if (p.complete) return (
-            <div key={p.subject} className="task done"><span className="ic">✓</span><span className="t"><b>{p.name}: week complete</b><span>New lessons are on the way. Keep sharp with Practice.</span></span></div>
-          );
+        {plan.items.map(p => {
           const href = p.next.writing ? '#/writing' : '#/s/' + p.next.key;
-          const sub = p.doneToday
-            ? (p.todayBest != null ? `Done today: ${p.todayBest}/8. ${p.todayBest >= 7 ? 'Next lesson tomorrow.' : 'Try again tomorrow.'}` : 'Writing sent today.')
-            : p.lastTry ? `Last try ${p.lastTry.score}/8. Aim for 7.` : `Lesson ${p.index + 1} of ${p.total}`;
-          return (
-            <a key={p.subject} href={href} className={'task' + (p.doneToday ? ' done' : '')} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <span className="ic">{p.doneToday ? '✓' : SUBJECTS[p.subject].icon}</span>
-              <span className="t"><span className="eyebrow">{p.name}</span><b>{p.next.title}</b><span>{sub}</span></span>
-            </a>
-          );
+          const last = p.results[p.results.length - 1];
+          const sub = p.finished ? `All ${PER_DAY} done today${last && !last.writing ? `. Last score ${last.score}/8` : ''}.`
+            : p.canStart ? `${p.review ? 'Review \u00b7 ' : ''}Lesson ${p.done + 1} of ${PER_DAY} today`
+            : `${p.done} of ${PER_DAY} done. Next opens at ${blockLabel(p.done)}.`;
+          const inner = (<>
+            <span className="ic">{p.finished ? '\u2713' : SUBJECTS[p.subject].icon}</span>
+            <span className="t"><span className="eyebrow">{p.name}</span><b>{p.finished ? 'Finished for today' : p.next.title}</b><span>{sub}</span></span>
+            <span className="pips" aria-hidden="true">{Array.from({ length: PER_DAY }, (_, i) => <i key={i} className={i < p.done ? 'on' : ''} />)}</span>
+          </>);
+          return p.canStart
+            ? <a key={p.subject} href={href} className="task" style={{ textDecoration: 'none', color: 'inherit' }}>{inner}</a>
+            : <div key={p.subject} className={'task' + (p.finished ? ' done' : ' wait')}>{inner}</div>;
         })}
       </div>
 
-      {review && (
-        <a href={'#/s/' + review.key} className="task" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <span className="ic" style={{ background: 'var(--amber-soft)', color: 'var(--amber)' }}>↻</span>
-          <span className="t"><span className="eyebrow">Optional extra</span><b>Review: {review.title}</b><span>Your weakest topic so far</span></span>
-        </a>
-      )}
+      <FishingCard data={data} link="#/fishing" />
 
       <StreakCard attempts={attempts} writings={writings} />
 

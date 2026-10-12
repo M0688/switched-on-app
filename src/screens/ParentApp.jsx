@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { familyStudents, getFamily, loadStudentData, tutorThreads, loadAlerts } from '../lib/api.js';
 import Alerts, { PushSetup } from './Alerts.jsx';
+import { ParentFishing, FishingCard } from '../components/Fishing.jsx';
 import { supabase } from '../lib/supabase.js';
 import { Logo, Tabs, useRoute, when } from '../components/ui.jsx';
 import Progress from './Progress.jsx';
 import Feedback from '../components/Feedback.jsx';
-import { todayPlan, isWeekend } from '../lib/stats.js';
+import { dayPlan, PER_DAY } from '../lib/plan.js';
+import { BlockStrip } from './Today.jsx';
 import { SUBJECTS, SCHEDULE } from '../content/index.js';
 
 function FamilyCode({ family, empty }) {
@@ -42,7 +44,7 @@ function Chats({ kid }) {
 
 export default function ParentApp({ profile }) {
   const [top] = useRoute();
-  const tab = ['writing', 'chats', 'alerts'].includes(top) ? top : 'progress';
+  const tab = ['writing', 'chats', 'alerts', 'fishing'].includes(top) ? top : 'progress';
   const [kids, setKids] = useState(null);
   const [family, setFamily] = useState(null);
   const [kidId, setKidId] = useState(null);
@@ -63,6 +65,7 @@ export default function ParentApp({ profile }) {
     Promise.all([familyStudents(), getFamily()]).then(([k, f]) => { setKids(k); setFamily(f); setKidId(k[0]?.id ?? null); }).catch(e => setErr(e.message));
   }, []);
   useEffect(() => { if (kidId) { setData(null); loadStudentData(kidId).then(setData).catch(e => setErr(e.message)); } }, [kidId]);
+  const reloadKid = () => loadStudentData(kidId).then(setData).catch(e => setErr(e.message));
   const kid = kids?.find(k => k.id === kidId);
 
   const header = (
@@ -92,9 +95,10 @@ export default function ParentApp({ profile }) {
         </details>
       ))}
     </main>);
+  else if (tab === 'fishing') body = <ParentFishing kid={kid} data={data} onChange={reloadKid} />;
   else if (tab === 'chats') body = <main className="page"><h1>Tutor chats</h1><p className="muted small">Everything {kid.display_name} has asked the AI tutor.</p><Chats kid={kid} /></main>;
   else {
-    const plan = todayPlan(SUBJECTS, data.attempts, data.writings, new Date(), SCHEDULE);
+    const plan = dayPlan(SUBJECTS, SCHEDULE, data.attempts, data.writings);
     body = (<>
       <div className="page" style={{ paddingBottom: 0 }}>
         {unseen > 0 && (
@@ -102,10 +106,13 @@ export default function ParentApp({ profile }) {
             <b className="err">{unseen} new alert{unseen === 1 ? '' : 's'}</b><span>{kid.display_name} may be upset. Tap to read.</span></a>
         )}
         <PushSetup compact />
-        <div className="card"><span className="eyebrow">Today</span>
-          {isWeekend() && <p className="muted">Weekend: no lessons. Back on Monday.</p>}
-          {plan.map(p => <div key={p.subject} className="row"><b>{p.name}</b><span className="muted">{p.complete ? 'Week complete' : p.next.title}</span><span className="spacer" />
-            {p.doneToday ? <span className="pill good">Done{p.todayBest != null ? ` ${p.todayBest}/8` : ''}</span> : <span className="pill quiet">Not yet</span>}</div>)}
+        <FishingCard data={data} link="#/fishing" />
+        <div className="card"><div className="row"><span className="eyebrow">Today</span><span className="spacer" />
+          {!plan.weekend && <b className="num">{plan.lessonsDone} of {plan.lessonsTotal} lessons</b>}</div>
+          {plan.weekend ? <p className="muted">Weekend: no lessons. Back on Monday.</p> : <BlockStrip plan={plan} />}
+          {plan.items.map(p => <div key={p.subject} className="row"><b>{p.name}</b>
+            <span className="muted small num">{p.results.map(r => r.writing ? 'writing' : `${r.score}/8`).join(' \u00b7 ') || 'not started'}</span><span className="spacer" />
+            <span className={'pill ' + (p.finished ? 'good' : p.done ? 'warn' : 'quiet')}>{p.done}/{PER_DAY}</span></div>)}
         </div>
       </div>
       <Progress profile={kid} data={data} />
@@ -113,5 +120,5 @@ export default function ParentApp({ profile }) {
     </>);
   }
 
-  return <>{header}{body}<Tabs current={tab} items={[['progress', 'Progress'], ['alerts', unseen ? `Alerts (${unseen})` : 'Alerts'], ['writing', 'Writing'], ['chats', 'Chats']]} /></>;
+  return <>{header}{body}<Tabs current={tab} items={[['progress', 'Progress'], ['alerts', unseen ? `Alerts (${unseen})` : 'Alerts'], ['fishing', 'Fishing'], ['writing', 'Writing'], ['chats', 'Chats']]} /></>;
 }

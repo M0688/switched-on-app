@@ -3,7 +3,7 @@ import { markAlertSeen, testPush, tutorThreads } from '../lib/api.js';
 import { pushSupport, currentSubscription, enablePush } from '../lib/push.js';
 import { when } from '../components/ui.jsx';
 
-export function PushSetup({ compact }) {
+export function PushSetup({ compact, student }) {
   const [state, setState] = useState('checking');
   const [msg, setMsg] = useState('');
   useEffect(() => {
@@ -14,7 +14,7 @@ export function PushSetup({ compact }) {
 
   async function turnOn() {
     setMsg('');
-    try { await enablePush(); setState('on'); await testPush(); setMsg('Done. A test alert is on its way to this phone.'); }
+    try { await enablePush(); setState('on'); if (student) setMsg('Reminders are on. You\u2019ll get one when each block opens.'); else { await testPush(); setMsg('Done. A test alert is on its way to this phone.'); } }
     catch (e) { setMsg(e.message); }
   }
   async function test() { setMsg(''); try { await testPush(); setMsg('Test alert sent.'); } catch (e) { setMsg(e.message); } }
@@ -22,11 +22,13 @@ export function PushSetup({ compact }) {
   if (state === 'checking' || (compact && state === 'on')) return null;
   return (
     <div className={state === 'on' ? 'card' : 'note'} style={state === 'on' ? null : { borderLeftColor: 'var(--bad)' }}>
-      {state === 'on' && <><b>Alerts are on for this phone.</b><div className="row"><button className="btn small ghost" onClick={test}>Send a test alert</button></div></>}
-      {state === 'off' && <><b>Turn on alerts</b><p>Get a notification straight away if he seems upset in the app.</p><div className="row"><button className="btn" onClick={turnOn}>Turn on alerts</button></div></>}
-      {state === 'ios-install' && <><b>Install the app to get alerts</b><p>On iPhone, tap Share, then <b>Add to Home Screen</b>. Open Switched On from your home screen and turn alerts on there.</p></>}
-      {state === 'denied' && <><b>Alerts are blocked</b><p>Notifications are turned off for this app. Turn them on in your phone's settings, then reopen the app.</p></>}
-      {state === 'unsupported' && <><b>This browser can't show alerts</b><p>Open the app in Chrome (Android) or install it to your home screen (iPhone).</p></>}
+      {state === 'on' && (student ? <b>Reminders are on for this phone.</b> : <><b>Alerts are on for this phone.</b><div className="row"><button className="btn small ghost" onClick={test}>Send a test alert</button></div></>)}
+      {state === 'off' && (student
+        ? <><b>Turn on reminders</b><p>Get a notification at 1pm, 5pm and 9pm when each study block opens.</p><div className="row"><button className="btn" onClick={turnOn}>Turn on reminders</button></div></>
+        : <><b>Turn on alerts</b><p>Get a notification straight away if he seems upset in the app.</p><div className="row"><button className="btn" onClick={turnOn}>Turn on alerts</button></div></>)}
+      {state === 'ios-install' && <><b>Install the app to get {student ? 'reminders' : 'alerts'}</b><p>On iPhone, tap Share, then <b>Add to Home Screen</b>. Open Switched On from your home screen and turn them on there.</p></>}
+      {state === 'denied' && <><b>{student ? 'Reminders are blocked' : 'Alerts are blocked'}</b><p>Notifications are turned off for this app. Turn them on in your phone's settings, then reopen the app.</p></>}
+      {state === 'unsupported' && <><b>This browser can't show notifications</b><p>Open the app in Chrome (Android) or install it to your home screen (iPhone).</p></>}
       {state === 'unconfigured' && <p>Phone alerts aren't set up on the server yet. Alerts still appear on this page.</p>}
       {msg && <p className="small" role="status">{msg}</p>}
     </div>

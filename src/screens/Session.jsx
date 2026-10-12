@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { byKey, makeSet, SUBJECTS } from '../content/index.js';
+import { byKey, makeSet, SUBJECTS, SCHEDULE } from '../content/index.js';
+import { lessonAccess } from '../lib/plan.js';
 import { saveAttempt } from '../lib/api.js';
 import { PASS } from '../lib/stats.js';
 import { TutorSheet, newThread } from '../components/Tutor.jsx';
+import { rewardsFor, Float } from '../components/Fishing.jsx';
 
 const strip = html => html.replace(/<[^>]+>/g, '');
 
@@ -64,10 +66,13 @@ function Question({ q, n, onAnswer, onHelp }) {
 
 export default function Session({ sessionKey, data, onSaved }) {
   const session = byKey(sessionKey);
+  // Decided once when the lesson is opened, so finishing it doesn't lock the screen.
+  const [access] = useState(() => lessonAccess(SUBJECTS, SCHEDULE, data.attempts, data.writings, sessionKey));
   const tried = data.attempts.some(a => a.session_key === sessionKey);
   const [showLesson, setShowLesson] = useState(!tried);
   const [qs, setQs] = useState(() => session && !session.writing ? makeSet(session).map(q => ({ ...q })) : []);
   const [saved, setSaved] = useState(null);
+  const [savedId, setSavedId] = useState(null);
   const [saveErr, setSaveErr] = useState('');
   const started = useRef(Date.now());
   const [help, setHelp] = useState(null);
@@ -84,6 +89,9 @@ export default function Session({ sessionKey, data, onSaved }) {
 
   if (!session) return <main className="page"><p>That lesson wasn't found.</p><a href="#/practice">Back to Practice</a></main>;
   if (session.writing) { window.location.hash = '#/writing'; return null; }
+  if (!access.ok) return (
+    <main className="page"><a href="#/today" className="btn link" style={{ alignSelf: 'flex-start' }}>← Today</a>
+      <div className="card"><h2>{session.title}</h2><p>{access.why}</p><a className="btn" href="#/today">Back to Today</a></div></main>);
 
   async function save(list) {
     const score = list.filter(q => q.ok).length;
@@ -92,7 +100,7 @@ export default function Session({ sessionKey, data, onSaved }) {
       duration_s: Math.round((Date.now() - started.current) / 1000),
       details: list.map(q => ({ q: q.q, ok: q.ok, given: q.o ? q.o[q.chosen] : q.last, answer: q.o ? q.o[q.a] : String(q.a) })),
     };
-    try { await saveAttempt(row); setSaved(score); setSaveErr(''); onSaved(); }
+    try { const rowSaved = await saveAttempt(row); setSavedId(rowSaved.id); setSaved(score); setSaveErr(''); onSaved(); }
     catch (e) { setSaveErr(e.message); }
     saving.current = false;
   }
@@ -102,7 +110,7 @@ export default function Session({ sessionKey, data, onSaved }) {
   }
 
   function again() {
-    setQs(makeSet(session).map(q => ({ ...q }))); setSaved(null); threads.current = {}; started.current = Date.now();
+    setQs(makeSet(session).map(q => ({ ...q }))); setSaved(null); setSavedId(null); threads.current = {}; started.current = Date.now();
     window.scrollTo({ top: 0 });
   }
 
@@ -112,7 +120,7 @@ export default function Session({ sessionKey, data, onSaved }) {
     <main className="page">
       <a href="#/today" className="btn link" style={{ alignSelf: 'flex-start' }}>← Today</a>
       <div className="stack" style={{ gap: 4 }}>
-        <span className="eyebrow">{subj.name} · Lesson {idx + 1} of {subj.sessions.length}</span>
+        <span className="eyebrow">{subj.name} · {access.planned ? 'Today\u2019s lesson' : 'Extra practice'}</span>
         <h1>{session.title}</h1>
       </div>
 
@@ -129,9 +137,10 @@ export default function Session({ sessionKey, data, onSaved }) {
       {saved != null && (
         <div className="card" style={{ borderColor: 'var(--accent)', borderWidth: 2 }}>
           <h2>{saved} out of {qs.length}</h2>
-          <p>{saved >= PASS
-            ? (idx < subj.sessions.length - 1 ? `Lesson passed. ${subj.sessions[idx + 1].title} unlocks next.` : 'Lesson passed. That’s this week’s ' + subj.name + ' done.')
-            : `Aim for ${PASS}. Have another look at the lesson and try a new set tomorrow.`}</p>
+          <p>{saved >= PASS ? 'Great work. You\u2019ve got this one.'
+            : saved >= 4 ? 'Not bad. Read the explanations on the ones you missed; this lesson will come back for review later.'
+            : 'This one needs more work. Read through the answers above; it will come back for review later.'}</p>
+          <FishingNote data={data} attemptId={savedId} />
           <div className="row"><a className="btn" href="#/today">Back to Today</a><button className="btn ghost" onClick={again}>New questions</button></div>
         </div>
       )}
@@ -147,5 +156,28 @@ export default function Session({ sessionKey, data, onSaved }) {
         intro={help != null && qs[help].ok ? "Nice. Want to check you really understand it?" : "Let's look at where it went wrong. What did you do?"}
         chips={help != null && qs[help].ok ? ['Why is that the answer?', 'Give me a harder one'] : ['Explain the method step by step', 'Where did I go wrong?', 'Give me a similar one to try']} />
     </main>
+  );
+}
+
+/** What this lesson earned in fishing time. The hidden minimum is never explained to him. */
+function FishingNote({ data, attemptId }) {
+  if (!attemptId) return null;
+  const r = rewardsFor(data);
+  const l = r.lessons.find(x => x.attemptId === attemptId);
+  if (!data.attempts.some(a => a.id === attemptId)) return <p className="muted small">Working out your fishing time…</p>;
+  let text, strong = false;
+  if (!l) text = 'Extra practice doesn\u2019t earn fishing time, but it all helps.';
+  else if (l.counted) { text = '+10 minutes of fishing time.'; strong = true; }
+  else text = 'No fishing time for this one. Take it a bit slower next time.';
+  return (
+    <div className="row" style={{ flexWrap: 'nowrap', background: 'var(--amber-soft)', borderRadius: 10, padding: '8px 10px' }}>
+      <Float />
+      <div className="stack" style={{ gap: 2 }}>
+        <span style={{ fontWeight: strong ? 700 : 400 }}>{text}</span>
+        {r.perfectDayToday && r.thisWeek.bonus?.reason === 'perfect-day' && <b>100% on every lesson today: 24-hour fishing session earned!</b>}
+        {r.thisWeek.bonus?.reason === 'perfect-subject' && <b>{r.thisWeek.bonus.label}: 24-hour fishing session earned!</b>}
+        <a href="#/fishing" className="small">Bank: {Math.floor(r.availableMin / 60)}h {r.availableMin % 60}m</a>
+      </div>
+    </div>
   );
 }

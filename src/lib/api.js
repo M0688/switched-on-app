@@ -23,11 +23,12 @@ export async function setupStudent(name, code) { return must(await supabase.rpc(
 export async function joinAsParent(name, code) { return must(await supabase.rpc('join_as_parent', { p_name: name, p_code: code })); }
 
 export async function loadStudentData(userId) {
-  const [a, w] = await Promise.all([
-    supabase.from('attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(1000),
-    supabase.from('writing_submissions').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(200),
+  const [a, w, f] = await Promise.all([
+    supabase.from('attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5000),
+    supabase.from('writing_submissions').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(500),
+    supabase.from('fishing_log').select('*').eq('student_id', userId).order('created_at', { ascending: false }).limit(1000),
   ]);
-  return { attempts: must(a), writings: must(w) };
+  return { attempts: must(a), writings: must(w), fishing: must(f) };
 }
 
 export async function saveAttempt(row) {
@@ -62,3 +63,10 @@ export async function markAlertSeen(id) {
   return must(await supabase.from('alerts').update({ seen_at: new Date().toISOString() }).eq('id', id));
 }
 export const testPush = () => invoke('test-push', {});
+
+export async function logFishing(student, minutes, note) {
+  return must(await supabase.from('fishing_log').insert({ student_id: student.id, family_id: student.family_id, minutes, note: note || null }).select().single());
+}
+export async function undoFishing(id) {
+  return must(await supabase.from('fishing_log').delete().eq('id', id));
+}

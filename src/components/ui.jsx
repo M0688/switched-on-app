@@ -25,6 +25,7 @@ const icons = {
   help: <><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01" /></>,
   writing: <><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M14 6l4 4" /></>,
   chats: <><path d="M4 5h16v11H8l-4 4z" /></>,
+  fishing: <><path d="M3 12c3-5 9-6 14-2l4-3v10l-4-3c-5 4-11 3-14-2z" /><circle cx="8" cy="11" r=".8" /></>,
   alerts: <><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z" /><path d="M10 21h4" /></>,
 };
 export function Tabs({ items, current }) {

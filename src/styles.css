@@ -152,3 +152,14 @@ details summary{cursor:pointer;font-weight:700;color:var(--accent)}
 .tbl th,.tbl td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .tbl th{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .lesson ol li{padding-left:2px}
+
+.blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.blk{border:2px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;background:var(--surface)}
+.blk b{font-family:var(--display);font-size:1.15rem}
+.blk span{font-size:.8rem;color:var(--muted);font-weight:700}
+.blk.open{border-color:var(--accent)} .blk.open span{color:var(--accent)}
+.blk.done{border-color:var(--good);background:var(--good-soft)} .blk.done span{color:var(--good)}
+.task.wait{opacity:.7}
+.pips{display:flex;gap:4px;flex:none}
+.pips i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.pips i.on{background:var(--good)}

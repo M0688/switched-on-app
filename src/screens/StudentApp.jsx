@@ -8,6 +8,7 @@ import Writing from './Writing.jsx';
 import Progress from './Progress.jsx';
 import Help from './Help.jsx';
 import { isWeekend } from '../lib/stats.js';
+import { FishingPage } from '../components/Fishing.jsx';
 
 export default function StudentApp({ profile }) {
   const route = useRoute();
@@ -31,6 +32,7 @@ export default function StudentApp({ profile }) {
   else if (top === 'practice') body = <Practice data={data} />;
   else if (top === 'progress') body = <Progress profile={profile} data={data} self />;
   else if (top === 'help') body = <Help />;
+  else if (top === 'fishing') body = <FishingPage data={data} />;
   else body = <Today profile={profile} data={data} />;
 
   const tabs = weekend ? [['today', 'Today'], ['progress', 'Progress']] : [['today', 'Today'], ['practice', 'Practice'], ['progress', 'Progress'], ['help', 'Ask']];

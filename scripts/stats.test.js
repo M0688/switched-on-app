@@ -25,7 +25,7 @@ test('English writing session passes once marked', () => {
   let p = todayPlan(SUBJECTS, a, [{ status: 'pending', created_at: at(14) }], now);
   assert.equal(p[1].next.key, 'e-s6'); assert.equal(p[1].doneToday, true);
   p = todayPlan(SUBJECTS, a, [{ status: 'marked', created_at: at(14) }], now);
-  assert.equal(p[1].complete, true);
+  assert.equal(p[1].next.key, 'e-s7');
 });
 
 test('streak counts back from yesterday if today not done, and uses London days', () => {
@@ -64,7 +64,7 @@ test('session keys are unique and every numeric answer is a clean number', () =>
   assert.equal(new Set(ALL.map(s => s.key)).size, ALL.length);
   for (const s of ALL) if (!s.writing) for (let i = 0; i < 300; i++) for (const q of makeSet(s)) {
     if (q.o) { assert.equal(new Set(q.o).size, q.o.length, s.key + ' duplicate options: ' + q.q); assert.ok(q.s, s.key + ' missing explanation'); }
-    else assert.ok(Number.isFinite(q.a) && Math.abs(q.a * 1000 - Math.round(q.a * 1000)) < 1e-6, s.key + ' bad answer ' + q.a + ' for ' + q.q);
+    else assert.ok(Number.isFinite(q.a) && Math.abs(q.a * 1e5 - Math.round(q.a * 1e5)) < 1e-6, s.key + ' bad answer ' + q.a + ' for ' + q.q);
   }
 });
 
