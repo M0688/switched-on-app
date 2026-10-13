@@ -1,4 +1,4 @@
-import { admin, callClaude, cors, isWeekend, json, requireStudent, takeQuota } from '../_shared/common.ts';
+import { admin, callClaude, cors, isWeekend, json, requireLearner, takeQuota } from '../_shared/common.ts';
 import { classify, raiseAlert } from '../_shared/wellbeing.ts';
 
 const MODEL = Deno.env.get('TUTOR_MODEL') ?? 'claude-haiku-5-5';
@@ -21,22 +21,59 @@ How to help:
 - If he says something that suggests he is unsafe, being hurt, or very upset, put schoolwork aside: respond kindly, take him seriously, encourage him to talk to his parent or another trusted adult, and tell him he can call or chat with Childline free and in confidence on 0800 1111 (childline.org.uk). If he is in immediate danger, he should call 999. Do not try to counsel him yourself.
 - His parent can read these chats and is alerted if he seems upset. If he asks, be honest about this.`;
 
+// Adult course: circuit board repair. No child-safeguarding checks, no weekend lockout.
+const REPAIR_SYSTEM = (name: string) => `You are the tutor inside a training app used by ${name}, who runs an electronics repair business in the UK and is working through a circuit board repair course (component-level repair of phones, tablets, laptops, consoles, TVs and power supplies, and industrial boards).
+How to help:
+- Be direct and practical, like an experienced bench technician mentoring a capable colleague. Plain text, no markdown headings. Usually under 200 words.
+- Answer questions directly. For a lesson question he has answered, explain why the right answer is right and where his reasoning slipped.
+- For a live fault, ask for the device and model, symptoms, current draw and readings if they're missing, then suggest the next measurement in a sensible order.
+- Be accurate. If something depends on the exact model or schematic, say so rather than guessing a part number or a value.
+- Flag real hazards briefly where relevant: mains primaries and bulk capacitors, Li-ion batteries, hot air near flammables, fumes.
+- Use UK spelling and SI units. No LaTeX.
+- Stay on electronics, repair, tools and running a repair bench.`;
+
+const REPAIR_LIMIT = Number(Deno.env.get('REPAIR_TUTOR_DAILY_LIMIT') ?? 100);
+
+async function repairTutor(profile: { id: string; display_name: string }, body: { thread_id: string; session_key?: string; context?: string; message: string }) {
+  const { thread_id, session_key, context, message } = body;
+  if (!(await takeQuota(profile.id, 'tutor', REPAIR_LIMIT))) return json({ error: "You've used today's tutor messages. They reset tomorrow." }, 429);
+  const { data: history } = await admin.from('tutor_messages')
+    .select('role, content').eq('thread_id', thread_id).eq('user_id', profile.id)
+    .order('created_at').limit(20);
+  const ctx = typeof context === 'string' ? context.slice(0, 3000) : '';
+  const messages = [
+    ...(history ?? []).map((m) => ({ role: m.role, content: m.content })),
+    { role: 'user', content: message.trim() },
+  ];
+  if (!history?.length && ctx) messages[0] = { role: 'user', content: `${ctx}\n\nMy question: ${message.trim()}` };
+  const out = await callClaude({ model: MODEL, max_tokens: 700, system: REPAIR_SYSTEM(profile.display_name), messages });
+  const reply = (out.content ?? []).filter((b: { type: string }) => b.type === 'text').map((b: { text: string }) => b.text).join('\n').trim()
+    || "Sorry, I couldn't come up with a good answer. Try asking another way.";
+  await admin.from('tutor_messages').insert([
+    { user_id: profile.id, thread_id, session_key: session_key ?? null, role: 'user', content: messages[messages.length - 1].content },
+    { user_id: profile.id, thread_id, session_key: session_key ?? null, role: 'assistant', content: reply },
+  ]);
+  return json({ reply });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   try {
-    const auth = await requireStudent(req);
+    const auth = await requireLearner(req);
     if (auth.error) return auth.error;
     const { profile } = auth;
 
-    const { thread_id, session_key, context, message } = await req.json();
+    const body = await req.json();
+    const { thread_id, session_key, context, message } = body;
     if (typeof message !== 'string' || !message.trim() || message.length > 1500)
       return json({ error: 'Type a question first (under 1500 characters).' }, 400);
     if (typeof thread_id !== 'string' || !/^[0-9a-f-]{36}$/.test(thread_id))
       return json({ error: 'Bad request.' }, 400);
+    if (profile.role !== 'student') return await repairTutor(profile, body);
 
     // Wellbeing check runs on every message, even if the tutor itself fails or the daily limit is hit.
     const text = message.trim();
-    const alerted = classify(text).then(c => c.level === 'none' ? null
+    const alerted = classify(text, typeof context === 'string' ? context : '').then(c => c.level === 'none' ? null
       : raiseAlert(profile, { level: c.level, reason: c.reason || 'Seemed upset', excerpt: text, source: 'tutor', thread_id }));
 
     if (isWeekend()) {

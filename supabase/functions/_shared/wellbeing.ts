@@ -10,7 +10,8 @@ urgent: any mention or hint of suicide, wanting to die or disappear, self-harm, 
 concern: clearly upset or distressed beyond normal study frustration, e.g. hopelessness ("what's the point of anything"), strong self-hatred ("I'm worthless", "I hate myself"), being bullied, not sleeping/eating, crying, panic, feeling very lonely or anxious.
 none: normal schoolwork chat and ordinary frustration or slang ("this is so hard", "I'm bored", "maths is killing me", "ugh I hate fractions", "I'm dead lol").
 
-When unsure between none and concern, choose concern. Always call the record tool.`;
+This is a study app. Requests about schoolwork are always "none", including words like "method", "step by step", "answer", "explain", "kill" in a maths sense, or "I give up" about a question. Never read a hidden meaning into a neutral study request: only flag what the student's own words actually say about themselves or their safety.
+When the student's own words show real distress and you are unsure between none and concern, choose concern. Always call the record tool.`;
 
 const TOOL = {
   name: 'record',
@@ -32,12 +33,20 @@ const CONCERN_RE = /\b(hate myself|i'?m worthless|no ?one (cares|likes me)|being
 
 export type Level = 'none' | 'concern' | 'urgent';
 
-export async function classify(text: string): Promise<{ level: Level; reason: string }> {
+// The app's own suggestion chips: never flag these.
+const PRESETS = new Set([
+  'explain the method step by step', 'where did i go wrong?', 'give me a similar one to try',
+  'why is that the answer?', 'give me a harder one',
+  'how do i remember spellings?', 'what does an rcd do?', 'what maths do electricians use?',
+]);
+
+export async function classify(text: string, context = ''): Promise<{ level: Level; reason: string }> {
+  if (PRESETS.has(text.trim().toLowerCase())) return { level: 'none', reason: '' };
   try {
     const out = await callClaude({
       model: CLASSIFIER_MODEL, max_tokens: 200, system: SYSTEM,
       tools: [TOOL], tool_choice: { type: 'tool', name: 'record' },
-      messages: [{ role: 'user', content: `<student_text>\n${text.slice(0, 6000)}\n</student_text>` }],
+      messages: [{ role: 'user', content: `${context ? `<lesson_context note="written by the app, not the student">\n${context.slice(0, 1500)}\n</lesson_context>\n` : ''}<student_text>\n${text.slice(0, 6000)}\n</student_text>` }],
     });
     const r = (out.content ?? []).find((b: { type: string }) => b.type === 'tool_use')?.input;
     if (r && ['none', 'concern', 'urgent'].includes(r.level)) {

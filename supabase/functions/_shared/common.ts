@@ -27,6 +27,18 @@ export async function requireStudent(req: Request) {
   return { profile: prof as { id: string; display_name: string; family_id: string } };
 }
 
+/** Returns the signed-in learner's profile: any student, or a parent who follows a course of their own. */
+export async function requireLearner(req: Request) {
+  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+  if (!token) return { error: json({ error: 'Please sign in again.' }, 401) };
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data.user) return { error: json({ error: 'Please sign in again.' }, 401) };
+  const { data: prof } = await admin.from('profiles').select('*').eq('id', data.user.id).single();
+  if (!prof || (prof.role !== 'student' && (prof.course ?? 'gcse') === 'gcse'))
+    return { error: json({ error: 'Only learner accounts can use this.' }, 403) };
+  return { profile: prof as { id: string; display_name: string; family_id: string; role: string; course?: string } };
+}
+
 function londonDay() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
 }
