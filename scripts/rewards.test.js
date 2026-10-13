@@ -13,7 +13,9 @@ const run = (attempts, now, writings = [], log = []) => computeRewards({ subject
 const plan = (attempts, now, writings = []) => dayPlan(SUBJECTS, SCHEDULE, attempts, writings, new Date(now));
 
 // A whole Monday block: maths, english, science, electrical lessons s{k}
-const block = (k, score, iso, secs) => ['m', 'e', 'sc', 'el'].map(p => A(`${p}-s${k}`, score, iso, secs));
+// The k-th lesson (1-based) of a subject, in course order
+const K = (p, k) => SUBJECTS[SUBJ[p]].sessions[k - 1].key;
+const block = (k, score, iso, secs) => ['m', 'e', 'sc', 'el'].map(p => A(K(p, k), score, iso, secs));
 
 test('blocks open at 1pm, 5pm and 9pm UK time; none at weekends', () => {
   assert.equal(blocksOpen(new Date(t(12, 11, 59))), 0);
@@ -53,7 +55,7 @@ test('10 minutes per planned lesson; extra practice and a 4th lesson do not coun
 });
 
 test('hidden minimum: under 4/8 never; 4-5/8 needs 3 minutes; 6/8+ always', () => {
-  const r = run([A('m-s1', 3, t(12, 12, 1), 900), A('e-s1', 5, t(12, 12, 2), 120), A('sc-s1', 4, t(12, 12, 3), 180), A('el-s1', 8, t(12, 12, 4), 45)], t(12, 13));
+  const r = run([A('m-s1', 3, t(12, 12, 1), 900), A('e-s1', 5, t(12, 12, 2), 120), A(K('sc', 1), 4, t(12, 12, 3), 180), A(K('el', 1), 8, t(12, 12, 4), 45)], t(12, 13));
   assert.equal(r.thisWeek.baseMin, 20);
   assert.deepEqual(r.lessons.filter(l => !l.counted).map(l => l.reason).sort(), ['Score under 4/8', 'Scored 4 or 5 out of 8 in under 3 minutes']);
 });
@@ -71,7 +73,7 @@ test('perfect day needs all 12 lessons done at 8/8', () => {
 
 test('perfect subject week: science 8/8 in all 3 blocks on Mon, Wed and Fri', () => {
   let k = 0;
-  const sci = d => [12, 16, 20].map(h => A(`sc-s${++k}`, 8, t(d, h, 5)));
+  const sci = d => [12, 16, 20].map(h => A(K('sc', ++k), 8, t(d, h, 5)));
   const a = [...sci(12), ...sci(14)];
   assert.equal(run(a, t(14, 21)).thisWeek.bonus, null); // Friday still to come
   const fri = sci(16);
@@ -94,10 +96,10 @@ test('nothing counts at weekends', () => {
 });
 
 test('when a subject runs out, the weakest lesson comes back as review', () => {
-  const a = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((k, i) => A(`sc-s${k}`, k === 4 ? 3 : 8, t([12, 14, 16][Math.floor(i / 3)], 12 + 4 * (i % 3), 5)));
+  const a = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((k, i) => A(K('sc', k), k === 4 ? 3 : 8, t([12, 14, 16][Math.floor(i / 3)], 12 + 4 * (i % 3), 5)));
   const p = plan(a, t(19, 12, 30));
   const sci = p.items.find(i => i.subject === 'science');
-  assert.equal(sci.next.key, 'sc-s4'); assert.equal(sci.review, true); assert.equal(sci.canStart, true);
+  assert.equal(sci.next.key, K('sc', 4)); assert.equal(sci.review, true); assert.equal(sci.canStart, true);
 });
 
 test('writing task fills an English slot when submitted', () => {

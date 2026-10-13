@@ -1,11 +1,14 @@
 /* Lessons stored in the database (added weekly by a scheduled task) are appended after the
-   built-in lessons for each subject. Format of each row's `questions` (at least 8, ideally 12-15):
+   built-in lessons for each subject, in whichever course owns that subject. Repair rows also carry
+   `level` (1 core, 2 bench, 3 advanced). Format of each row's `questions` (at least 8, ideally 12-15):
      { "type": "mc", "q": "...", "options": ["...", "..."], "answer": 0, "why": "...", "passage": "optional" }
      { "type": "number", "q": "...", "answer": 12.5, "unit": "m", "unit_before": false, "why": "..." } */
-import { SUBJECTS, ALL } from './index.js';
+import { COURSES } from './courses.js';
+import { PREFIX as REPAIR_PREFIX } from './repair/index.js';
 import { shuffle } from './kit.js';
 
-const PREFIX = { maths: 'm', english: 'e', science: 'sc', statistics: 'st', business: 'b', electrical: 'el' };
+const PREFIX = { maths: 'm', english: 'e', science: 'sc', statistics: 'st', business: 'b', electrical: 'el', ...REPAIR_PREFIX };
+const ownerOf = subject => Object.values(COURSES).find(c => c.subjects[subject]);
 const ALLOWED = new Set(['P', 'B', 'I', 'EM', 'STRONG', 'UL', 'OL', 'LI', 'DIV', 'SPAN', 'H3', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TH', 'TD', 'BR', 'SUP', 'SUB']);
 const CLASSES = new Set(['work', 'eyebrow', 'slip', 'tbl', 'x', 'y', 'muted', 'small']);
 
@@ -50,7 +53,8 @@ function toQuestion(q) {
 export function addLessons(rows) {
   let added = 0;
   for (const row of [...rows].sort((a, b) => a.position - b.position)) {
-    const subj = SUBJECTS[row.subject];
+    const course = ownerOf(row.subject);
+    const subj = course?.subjects[row.subject];
     if (!subj) continue;
     const key = `${PREFIX[row.subject]}-d${row.position}`;
     if (subj.sessions.some(s => s.key === key)) continue;
@@ -60,7 +64,8 @@ export function addLessons(rows) {
       id: 'd' + row.position, key, subject: row.subject, title: row.title, sub: row.sub ?? '',
       lesson: sanitize(row.lesson_html), make: () => shuffle(qs).slice(0, 8).map(toQuestion),
     };
-    subj.sessions.push(session); ALL.push(session); added++;
+    if ([1, 2, 3].includes(row.level)) session.level = row.level;
+    subj.sessions.push(session); course.all.push(session); added++;
   }
   return added;
 }

@@ -14,7 +14,7 @@ const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE
 
 const BLOCK_HOURS = [13, 17, 21];
 const SCHEDULE: Record<number, string[]> = { 1: ['Science', 'Electrical'], 2: ['Statistics', 'Business'], 3: ['Science', 'Electrical'], 4: ['Statistics', 'Business'], 5: ['Science', 'Electrical'] };
-const REPAIR_TRACK: Record<number, string> = { 1: 'Fundamentals and components', 2: 'Test and measurement', 3: 'Fault-finding', 4: 'Soldering and rework', 5: 'Devices' };
+const REPAIR_SUBJECTS = 'Components, testing, PCBs, phones, motherboards and consoles';
 
 let vapidReady = false;
 function setupVapid() {
@@ -72,8 +72,8 @@ Deno.serve(async (req) => {
     const { error } = await admin.from('reminder_log').insert({ user_id: s.id, day, block: block + 1 });
     if (error) continue;
     sent += await pushTo([s.id], {
-      title: block === 0 ? 'Repair course: first lesson is open' : `Repair course: lesson ${block + 1} of 3 is open`,
-      body: `${REPAIR_TRACK[wd]}. About 15 minutes.`,
+      title: block === 0 ? 'Repair course: block 1 is open' : `Repair course: block ${block + 1} of 3 is open`,
+      body: `${REPAIR_SUBJECTS}: one lesson each, about 15 minutes each.`,
       tag: 'repair-block',
       url: './#/me',
     });

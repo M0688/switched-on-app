@@ -1,11 +1,16 @@
 import React from 'react';
-import { SUBJECTS, ALL, byKey } from '../content/index.js';
+import { useCourse } from '../lib/course.js';
+import { findSession, placement, lessonAttempts } from '../content/courses.js';
 import { sessionStats, streak, totals } from '../lib/stats.js';
 import { StreakCard } from './Today.jsx';
 import { pct, when } from '../components/ui.jsx';
 
 export default function Progress({ profile, data, self }) {
-  const { attempts, writings } = data;
+  const course = useCourse();
+  const { writings } = data;
+  const attempts = course.assessment ? lessonAttempts(data.attempts) : data.attempts;
+  const ALL = course.all, SUBJECTS = course.subjects;
+  const place = course.assessment ? placement(data.attempts) : {};
   const st = sessionStats(ALL, attempts, writings);
   const t = totals(attempts);
   const passed = st.filter(s => s.passed).length;
@@ -25,6 +30,17 @@ export default function Progress({ profile, data, self }) {
 
       {weak.length > 0 && (
         <div className="note"><b>{self ? 'Worth another go' : 'Needs work'}:</b> {weak.slice(0, 3).map(w => w.session.title).join(', ')}</div>
+      )}
+
+      {course.assessment && (
+        <div className="card">
+          <div className="row"><span className="eyebrow">Placement</span><span className="spacer" />
+            {self && <a href="#/assess" className="small">{Object.keys(place).length ? 'Retake' : 'Take it now'}</a>}</div>
+          {Object.entries(SUBJECTS).map(([id, subj]) => (
+            <div key={id} className="row"><b>{subj.name}</b><span className="spacer" />
+              {place[id] ? <span className="muted small num" style={{ whiteSpace: 'nowrap' }}>{place[id].score}/6 · starts at {course.levels[place[id].level]}</span> : <span className="muted small">Not taken</span>}</div>
+          ))}
+        </div>
       )}
 
       {Object.entries(SUBJECTS).map(([id, subj]) => (
@@ -48,7 +64,7 @@ export default function Progress({ profile, data, self }) {
         {!attempts.length && <p className="muted">Nothing yet. Finished lessons show up here.</p>}
         <div className="list">
           {attempts.slice(0, 15).map(a => {
-            const s = byKey(a.session_key); const missed = (a.details || []).filter(d => !d.ok);
+            const s = findSession(course, a.session_key); const missed = (a.details || []).filter(d => !d.ok);
             return (
               <details key={a.id} className="li" style={{ display: 'block' }}>
                 <summary><span style={{ color: 'var(--ink)' }}>{s?.title ?? a.session_key}</span> <span className="num">{a.score}/{a.total}</span>
