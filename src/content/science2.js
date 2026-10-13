@@ -8,6 +8,7 @@ export default [
 ${table(['Quantity', 'Unit'], [['Distance', 'metres (m)'], ['Time', 'seconds (s)'], ['Speed', 'metres per second (m/s)']])}
 ${ex('Worked example', 'A van travels 600 m in 30 s.', 'Speed = 600 ÷ 30 = <b>20 m/s</b>')}
 ${ex('Rearranging', 'distance = speed × time', 'time = distance ÷ speed')}
+<p><b>Distance-time graphs</b>: a <b>steeper</b> line means a faster speed. A <b>flat</b> (horizontal) line means the object has stopped.</p>
 ${slip('Check the units match: if the time is in minutes, change it to seconds first.')}`,
   make: mixed([
     ['The unit of speed is…', 'm/s', 'm', 's', 'N', 'Metres per second.'],
@@ -44,6 +45,7 @@ ${ex('Efficiency', 'efficiency = useful energy out ÷ total energy in', 'A bulb 
 {
   id: 's9', title: 'Moving in and out of cells', sub: 'Biology: diffusion, osmosis and active transport',
   lesson: `${ul(['<b>Diffusion:</b> particles spread from where there are lots of them (high concentration) to where there are few (low concentration). No energy needed. Example: oxygen moving into blood in the lungs.', '<b>Osmosis:</b> the diffusion of <b>water</b> across a partially permeable membrane, from a dilute solution to a more concentrated one.', '<b>Active transport:</b> moving particles from low to high concentration, against the gradient. It <b>needs energy</b> from respiration. Example: plant roots taking in minerals from soil.'])}
+<p>Diffusion is <b>faster</b> when it’s warmer (particles move faster) and when there’s a bigger difference in concentration.</p>
 ${slip('Diffusion and osmosis don’t need energy. Active transport does.')}`,
   make: fromBank([
     ['Particles spreading from high to low concentration is…', 'diffusion', 'active transport', 'respiration', 'photosynthesis', 'That’s the definition of diffusion.'],

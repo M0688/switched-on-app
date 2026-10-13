@@ -34,9 +34,6 @@ export async function loadStudentData(userId) {
 export async function saveAttempt(row) {
   return must(await supabase.from('attempts').insert(row).select().single());
 }
-export async function saveAttempts(rows) {
-  return must(await supabase.from('attempts').insert(rows).select());
-}
 
 export async function submitWriting(title, body, wordCount) {
   return must(await supabase.from('writing_submissions').insert({ title, body, word_count: wordCount }).select().single());

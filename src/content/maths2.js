@@ -117,7 +117,7 @@ ${slip('Rounding 382 to 1 significant figure gives 400, not 4. Keep the zeros to
   gen() {
     const t = r(0, 3);
     if (t === 0) { const n = r(101, 999); const a = Math.round(n / 10) * 10; return { q: `Round ${n} to the nearest 10`, a, s: `Look at the units digit (${n % 10}): ${a}` }; }
-    if (t === 1) { const n = r(1001, 9999) / 1000; const a = Math.round(n * 10) / 10; return { q: `Round ${n} to 1 decimal place`, a, s: `Look at the second decimal place: ${a}` }; }
+    if (t === 1) { let k; do { k = r(1001, 9999); } while (k % 10 === 0); const n = k / 1000, a = Math.round(n * 10) / 10; return { q: `Round ${n} to 1 decimal place`, a, s: `Look at the second decimal place (${String(k % 100).padStart(2, '0')[0]}): ${a.toFixed(1)}` }; }
     if (t === 2) { const n = r(120, 980); const mag = 100; const a = Math.round(n / mag) * mag; return { q: `Round ${n} to 1 significant figure`, a, s: `The first digit is in the hundreds. Look at the tens digit: ${a}` }; }
     const a = r(2, 9) * 10 + r(1, 4), b = r(2, 9) + pick([0.1, 0.2, 0.3]); const ea = Math.round(a / 10) * 10, eb = Math.round(b);
     return { q: `Estimate ${a} × ${b} by rounding each number to 1 significant figure`, a: ea * eb, s: `${a} ≈ ${ea} and ${b} ≈ ${eb}. ${ea} × ${eb} = ${ea * eb}` };

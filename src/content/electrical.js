@@ -111,7 +111,7 @@ ${slip('Buildings built or refurbished before 2000 may contain asbestos. If you 
 {
   id: 's5', title: 'Cable colours and protection', sub: 'Brown, blue, green and yellow; fuses, MCBs and RCDs',
   lesson: `${table(['Conductor', 'Colour now', 'Old colour (before 2004)'], [['Line (live)', 'Brown', 'Red'], ['Neutral', 'Blue', 'Black'], ['Protective earth', 'Green and yellow', 'Green and yellow']])}
-<p>Older houses can have both sets of colours. That needs a warning label, and care: the old black (neutral) and the new blue look nothing alike.</p>
+<p>Older houses can have both sets of colours, which needs a warning label. Take care: in old wiring <b>black is neutral</b>, but in modern three-phase wiring black is a <b>line</b> (live) conductor. Never trust colours alone. Always test.</p>
 <h3>Protective devices</h3>
 ${ul(['<b>Fuses and MCBs</b> (miniature circuit breakers) switch off if too much current flows. They protect the <b>cable</b> from overheating, not people.', '<b>RCDs</b> (residual current devices) compare the current going out on the line with the current coming back on the neutral. If some is leaking to earth, perhaps through a person, they trip. For protecting people they trip at <b>30 mA</b>, in a fraction of a second.', '<b>RCBOs</b> are an MCB and RCD in one device.', 'They all live in the <b>consumer unit</b> (what people call the fuse box).'])}
 <p><b>Earthing</b> gives fault current a safe path back, so the protective device switches off quickly instead of a metal case staying live.</p>

@@ -6,7 +6,7 @@ function moneyQ() {
   const biz = pick([['An electrician does', 'jobs'], ['A café sells', 'coffees'], ['A phone repair shop does', 'repairs'], ['A mobile car wash does', 'washes']]);
   if (t === 0) { const p = r(3, 40), q = r(10, 90); return { q: `${biz[0]} ${q} ${biz[1]} at £${p} each. What is the revenue?`, a: p * q, u: '£', pre: true, s: `Revenue = price × quantity = ${p} × ${q} = £${p * q}` }; }
   if (t === 1) { const f = r(2, 20) * 100, v = r(1, 30) * 50; return { q: `Fixed costs are £${f} and variable costs are £${v}. What are the total costs?`, a: f + v, u: '£', pre: true, s: `Total costs = fixed + variable = ${f} + ${v} = £${f + v}` }; }
-  if (t === 2) { const rev = r(20, 90) * 100, c = r(10, 80) * 100; return { q: `Revenue is £${rev} and total costs are £${c}. What is the profit? (Use a minus sign for a loss.)`, a: rev - c, u: '£', pre: true, s: `Profit = revenue − costs = ${rev} − ${c} = £${rev - c}${rev < c ? ' (a loss)' : ''}` }; }
+  if (t === 2) { const rev = r(20, 90) * 100, c = r(10, 80) * 100; return { q: `Revenue is £${rev} and total costs are £${c}. What is the profit? (Use a minus sign for a loss.)`, a: rev - c, u: '£', pre: true, s: `Profit = revenue − costs = ${rev} − ${c} = ${rev < c ? `−£${c - rev} (a loss of £${c - rev})` : `£${rev - c}`}` }; }
   const vc = r(2, 9), q = r(10, 60); return { q: `Each item costs £${vc} to make. ${q} are made. What are the total variable costs?`, a: vc * q, u: '£', pre: true, s: `Variable cost per unit × quantity = ${vc} × ${q} = £${vc * q}` };
 }
 
@@ -50,7 +50,7 @@ ${slip('An aim is the overall goal. An objective is a specific, measurable step 
 {
   id: 's3', title: 'Stakeholders', sub: 'Everyone affected by a business',
   lesson: `<p>A <b>stakeholder</b> is anyone affected by, or interested in, what a business does.</p>
-${table(['Stakeholder', 'What they want'], [['Owners / shareholders', 'Profit'], ['Employees', 'Fair pay, job security, safe work'], ['Customers', 'Good quality at a fair price'], ['Suppliers', 'Regular orders, paid on time'], ['Local community', 'Jobs, little noise or pollution'], ['Government', 'Taxes paid, laws followed']])}
+${table(['Stakeholder', 'What they want'], [['Owners / shareholders', 'Profit (shareholders get their share as dividends)'], ['Employees', 'Fair pay, job security, safe work'], ['Customers', 'Good quality at a fair price'], ['Suppliers', 'Regular orders, paid on time'], ['Local community', 'Jobs, little noise or pollution'], ['Government', 'Taxes paid, laws followed']])}
 <p><b>Internal</b> stakeholders are inside the business (owners, employees). <b>External</b> ones are outside (customers, suppliers, community, government).</p>
 ${ex('Conflict', 'Owners want lower costs to raise profit.', 'Employees want higher pay.', 'They can’t both fully get what they want.')}`,
   make: fromBank([
@@ -87,7 +87,7 @@ ${ex('Example', 'Many electricians start as sole traders: easy to set up, keep a
     ['A business owned by one person is a…', 'sole trader', 'partnership', 'Ltd company', 'franchise', 'Sole means one.'],
     ['Unlimited liability means…', 'owners are personally responsible for all debts', 'owners can only lose what they invested', 'there are no debts', 'the government pays debts', 'Personal belongings could be at risk.'],
     ['Limited liability means…', 'owners can only lose what they invested', 'owners must pay all debts personally', 'the business can’t borrow', 'there are no owners', 'Personal money is protected.'],
-    ['Which type has limited liability?', 'Private limited company (Ltd)', 'Sole trader', 'Partnership (usually)', 'None', 'That’s what "limited" means.'],
+    ['Which type has limited liability?', 'Private limited company (Ltd)', 'Sole trader', 'Partnership', 'None', 'That’s what "limited" means.'],
     ['An advantage of being a sole trader is…', 'you keep all the profit', 'limited liability', 'lots of people to share work', 'easy to raise huge amounts of money', 'No one else shares the profit.'],
     ['A disadvantage of a partnership is…', 'partners may disagree', 'only one owner', 'it can’t make profit', 'it must sell shares publicly', 'Decisions are shared, so disputes can happen.'],
     ['Running a branch of a well-known brand under licence is a…', 'franchise', 'sole trader', 'charity', 'partnership', 'e.g. many fast-food outlets.'],

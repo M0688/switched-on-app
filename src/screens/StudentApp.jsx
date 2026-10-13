@@ -9,11 +9,8 @@ import Progress from './Progress.jsx';
 import Help from './Help.jsx';
 import { isWeekend } from '../lib/stats.js';
 import { FishingPage } from '../components/Fishing.jsx';
-import Assessment from './Assessment.jsx';
-import { useCourse } from '../lib/course.js';
 
-export default function StudentApp({ profile, banner = null }) {
-  const course = useCourse();
+export default function StudentApp({ profile }) {
   const route = useRoute();
   const [data, setData] = useState(null);
   const [err, setErr] = useState('');
@@ -24,10 +21,8 @@ export default function StudentApp({ profile, banner = null }) {
   const tab = ['practice', 's', 'writing'].includes(top) ? 'practice' : top === 'progress' ? 'progress' : top === 'help' ? 'help' : 'today';
 
   const weekend = isWeekend();
-  // GCSE: everything closes at weekends. Repair: only lessons do; the tutor and placement check stay open.
-  const closed = course.weekendTutor ? ['s', 'practice'] : ['s', 'writing', 'practice', 'help'];
   let body;
-  if (weekend && closed.includes(top)) body = (
+  if (weekend && ['s', 'writing', 'practice', 'help'].includes(top)) body = (
     <main className="page"><div className="card"><h1>It's the weekend</h1>
       <p>No lessons on Saturdays and Sundays. Rest is part of learning. Everything's back on Monday.</p>
       <a className="btn" href="#/today">OK</a></div></main>);
@@ -37,11 +32,9 @@ export default function StudentApp({ profile, banner = null }) {
   else if (top === 'practice') body = <Practice data={data} />;
   else if (top === 'progress') body = <Progress profile={profile} data={data} self />;
   else if (top === 'help') body = <Help />;
-  else if (top === 'assess' && course.assessment) body = <Assessment onSaved={reload} />;
-  else if (top === 'fishing' && course.rewards) body = <FishingPage data={data} />;
+  else if (top === 'fishing') body = <FishingPage data={data} />;
   else body = <Today profile={profile} data={data} />;
 
-  const tabs = weekend ? [['today', 'Today'], ['progress', 'Progress'], ...(course.weekendTutor ? [['help', 'Ask']] : [])]
-    : [['today', 'Today'], ['practice', 'Practice'], ['progress', 'Progress'], ['help', 'Ask']];
-  return <>{banner}{body}<Tabs current={tab} items={tabs} /></>;
+  const tabs = weekend ? [['today', 'Today'], ['progress', 'Progress']] : [['today', 'Today'], ['practice', 'Practice'], ['progress', 'Progress'], ['help', 'Ask']];
+  return <>{body}<Tabs current={tab} items={tabs} /></>;
 }

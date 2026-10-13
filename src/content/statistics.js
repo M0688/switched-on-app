@@ -50,7 +50,9 @@ function pieQ() {
 const S = [
 {
   id: 's1', title: 'Types of data', sub: 'Qualitative, quantitative, discrete, continuous',
-  lesson: `${table(['Type', 'Meaning', 'Example'], [['Qualitative', 'Words or categories', 'Favourite colour, car make'], ['Quantitative', 'Numbers', 'Height, number of siblings'], ['Discrete', 'Numbers you count (exact values)', 'Shoe size, goals scored'], ['Continuous', 'Numbers you measure (any value in a range)', 'Height, time, weight']])}
+  lesson: `<p>All data is <b>either</b> qualitative <b>or</b> quantitative. Quantitative data is then <b>either</b> discrete <b>or</b> continuous.</p>
+${table(['Type', 'Meaning', 'Example'], [['Qualitative (also called categorical)', 'Words or categories', 'Favourite colour, car make'], ['Quantitative', 'Numbers. Always one of the two below.', 'See below'], ['↳ Discrete', 'Numbers you count (exact values)', 'Shoe size, goals scored'], ['↳ Continuous', 'Numbers you measure (any value in a range)', 'Height, time, weight']])}
+<p>So height is quantitative <b>and</b> continuous. If a question offers “continuous”, that is the more exact answer.</p>
 <p><b>Primary data</b> is collected by you (a survey you run). <b>Secondary data</b> was collected by someone else (government figures, a website).</p>
 ${ex('Quick test', 'Can it be any value, like 1.73 m? → continuous', 'Can you only count it, like 3 brothers? → discrete')}
 ${slip('Shoe size is discrete: you can buy 9 or 9½, but not 9.37.')}`,
@@ -72,6 +74,8 @@ ${slip('Shoe size is discrete: you can buy 9 or 9½, but not 9.37.')}`,
   id: 's2', title: 'Populations and samples', sub: 'Who to ask, and avoiding bias',
   lesson: `${ul(['The <b>population</b> is everyone (or everything) you want to find out about.', 'A <b>census</b> collects data from the whole population. Accurate, but slow and expensive.', 'A <b>sample</b> is part of the population. Quicker and cheaper.', 'A <b>random sample</b> gives every member an equal chance of being picked.', '<b>Bias</b> is when a sample doesn’t fairly represent the population.'])}
 ${ex('Example', 'To find how teenagers in Watford travel to college, you only ask people at the bus station.', 'That’s biased: people who drive or walk are left out.')}
+<p>A <b>leading question</b> pushes people towards an answer ("Don’t you agree college is great?"). It makes the results biased.</p>
+<p>A <b>pilot study</b> is a small trial run of a survey, to find problems before the real thing.</p>
 ${slip('A bigger sample is usually more reliable, but only if it’s chosen fairly.')}`,
   make: fromBank([
     ['Asking every single person in the population is a…', 'census', 'sample', 'pilot', 'bias', 'A census covers everyone.'],
@@ -114,6 +118,7 @@ ${slip('Range is one number: 11, not "9 to 20".')}`,
 {
   id: 's5', title: 'Frequency tables', sub: 'Organising data and finding averages from tables',
   lesson: `<p>A <b>frequency table</b> shows how many times each value appears.</p>
+<p>You often count with <b>tally marks</b>, grouped in fives: four lines, then a fifth line across them, which makes 5.</p>
 ${table(['Pets', 'Frequency'], [['0', '4'], ['1', '6'], ['2', '3'], ['3', '2']])}
 ${ex('From the table above', 'Total people: 4 + 6 + 3 + 2 = 15', 'Mode: 1 pet (highest frequency, 6)', 'Mean: (0×4 + 1×6 + 2×3 + 3×2) ÷ 15 = 18 ÷ 15 = 1.2')}
 ${slip('The mode is the value (1 pet), not the frequency (6).')}`,
@@ -124,7 +129,7 @@ ${slip('The mode is the value (1 pet), not the frequency (6).')}`,
 },
 {
   id: 's6', title: 'Charts', sub: 'Bar charts and pie charts',
-  lesson: `${ul(['<b>Bar charts</b> compare amounts in categories. Bars should be equal width with gaps between.', '<b>Pie charts</b> show proportions of a whole. The whole circle is 360°.'])}
+  lesson: `${ul(['<b>Bar charts</b> compare amounts in categories. Bars should be equal width with gaps between.', '<b>Pie charts</b> show proportions of a whole. The whole circle is 360°.', '<b>Line graphs</b> show how something changes over time (e.g. temperature through a day).'])}
 ${ex('Pie chart angle', '60 people asked; 15 chose tea.', 'Angle = 15 ÷ 60 × 360 = <b>90°</b>')}
 ${slip('Check your pie chart angles add up to 360°.')}`,
   make: mixed([

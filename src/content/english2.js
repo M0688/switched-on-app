@@ -6,7 +6,7 @@ export default [
   id: 's7', title: 'Apostrophes', sub: 'Missing letters and belonging',
   lesson: `<p>Apostrophes do two jobs:</p>
 ${ul(['<b>Missing letters:</b> do not → don’t, it is → it’s, they are → they’re', '<b>Belonging:</b> the electrician’s van (one electrician). The electricians’ vans (more than one).'])}
-${ex('Worked example', 'The van belongs to Sam: Sam’s van', 'The tools belong to the apprentices: the apprentices’ tools', 'The children own the toys: the children’s toys (children is already plural)')}
+${ex('Worked example', 'The van belongs to Sam: Sam’s van', 'The tools belong to the apprentices: the apprentices’ tools', 'The children own the toys: the children’s toys (children is already plural)', 'The car belongs to the boss: the boss’s car (one person whose name ends in s still gets ’s)')}
 ${slip('Plurals don’t need an apostrophe: "two cables", not "two cable’s".')}`,
   make: fromBank([
     ['Which is correct?', 'I don’t know.', 'I dont know.', 'I do’nt know.', 'I don,t know.', 'The apostrophe goes where the missing letter (o) was: do not → don’t.'],

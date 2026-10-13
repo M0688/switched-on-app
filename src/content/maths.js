@@ -78,7 +78,7 @@ gen(){for(;;){const n=r(4,6),m=r(4,14),xs=[];let sum=0;
   return{q:`${ctx} ${xs.join(', ')}`,a:m,s:`Total: ${xs.join(' + ')} = ${n*m}. There are ${n} numbers. ${n*m} ÷ ${n} = ${m}`}}}}},
 
 {id:'s6',title:'Subtraction with borrowing',sub:'Column method, plus checking',
-lesson:`<p>In the check he wrote 305 − 128 = 183. That's a borrowing slip. When the top digit is smaller, borrow from the column to the left. If that column is 0, borrow from the next one along first.</p>
+lesson:`<p>A common slip is 305 − 128 = 183. That's a borrowing mistake. When the top digit is smaller, borrow from the column to the left. If that column is 0, borrow from the next one along first.</p>
 <div class="work"><span class="eyebrow">Worked example: 305 − 128</span><div>Units: 5 − 8 won't go. Tens is 0, so borrow from the hundreds.</div><div>Hundreds 3 → 2. Tens 0 → 10, then lend 1 to units: tens 9, units 15.</div><div>Units: 15 − 8 = 7. Tens: 9 − 2 = 7. Hundreds: 2 − 1 = 1.</div><div>Answer: <b>177</b></div></div>
 <p class="slip">Always check by adding back: 177 + 128 = 305 ✓</p>`,
 gen(){for(;;){let a=r(201,999);if(Math.random()<.4)a=r(2,9)*100+r(0,8);const b=r(101,a-10);

@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { makeSet } from '../content/index.js';
-import { findSession, isSkipped } from '../content/courses.js';
-import { useCourse } from '../lib/course.js';
+import { byKey, makeSet, SUBJECTS, SCHEDULE } from '../content/index.js';
 import { lessonAccess } from '../lib/plan.js';
 import { saveAttempt } from '../lib/api.js';
 import { PASS } from '../lib/stats.js';
@@ -67,12 +65,9 @@ function Question({ q, n, onAnswer, onHelp }) {
 }
 
 export default function Session({ sessionKey, data, onSaved }) {
-  const course = useCourse();
-  const session = findSession(course, sessionKey);
+  const session = byKey(sessionKey);
   // Decided once when the lesson is opened, so finishing it doesn't lock the screen.
-  // Lessons below a placement level aren't in the plan but stay open as extra practice.
-  const [access] = useState(() => isSkipped(course, data.attempts, sessionKey) ? { ok: true, planned: false }
-    : lessonAccess(course.planSubjects(data.attempts), course.schedule, data.attempts, data.writings, sessionKey));
+  const [access] = useState(() => lessonAccess(SUBJECTS, SCHEDULE, data.attempts, data.writings, sessionKey));
   const tried = data.attempts.some(a => a.session_key === sessionKey);
   const [showLesson, setShowLesson] = useState(!tried);
   const [qs, setQs] = useState(() => session && !session.writing ? makeSet(session).map(q => ({ ...q })) : []);
@@ -89,7 +84,7 @@ export default function Session({ sessionKey, data, onSaved }) {
   }, [qs]);
 
   const done = qs.filter(q => q.done).length, ok = qs.filter(q => q.ok).length;
-  const subj = session ? course.subjects[session.subject] : null;
+  const subj = session ? SUBJECTS[session.subject] : null;
   const idx = subj ? subj.sessions.indexOf(session) : -1;
 
   if (!session) return <main className="page"><p>That lesson wasn't found.</p><a href="#/practice">Back to Practice</a></main>;
@@ -145,14 +140,14 @@ export default function Session({ sessionKey, data, onSaved }) {
           <p>{saved >= PASS ? 'Great work. You\u2019ve got this one.'
             : saved >= 4 ? 'Not bad. Read the explanations on the ones you missed; this lesson will come back for review later.'
             : 'This one needs more work. Read through the answers above; it will come back for review later.'}</p>
-          {course.rewards && <FishingNote data={data} attemptId={savedId} />}
+          <FishingNote data={data} attemptId={savedId} />
           <div className="row"><a className="btn" href="#/today">Back to Today</a><button className="btn ghost" onClick={again}>New questions</button></div>
         </div>
       )}
       {saveErr && <div className="card"><p className="err">Couldn't save your score: {saveErr}</p><button className="btn" onClick={() => save(qs)}>Try again</button></div>}
 
       {saved == null && (
-        <div className="sticky-score"><span>{ok} correct</span><div className="bar"><i style={{ width: (done / qs.length * 100) + '%' }} /></div><span className="muted">{done}/{qs.length}</span></div>
+        <div className="sticky-score"><span>{ok} correct</span><div className="bar"><i style={{ width: (done / qs.length * 100) + '%' }} /></div><span className="muted">{done} of {qs.length} answered</span></div>
       )}
 
       <TutorSheet open={help != null} onClose={() => setHelp(null)} title={help != null ? `Question ${help + 1}` : ''}

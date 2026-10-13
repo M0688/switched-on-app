@@ -84,7 +84,7 @@ const S=[
 lesson:`<p>The verb must match the <b>subject</b>, the thing the sentence is about. One thing takes <b>is / was / has</b>. More than one takes <b>are / were / have</b>.</p>
 <p>The trap: extra words often sit between the subject and the verb. Cover up the "of…" or "in…" part and see what's left.</p>
 <div class="work"><span class="eyebrow">Worked example</span><div>The box of fuses ___ on the shelf.</div><div>Cover "of fuses": <b>The box</b> ___ on the shelf.</div><div>One box, so: The box of fuses <span class="y">is</span> on the shelf.</div></div>
-<p class="slip">In the check he chose "are", because "fuses" sits right before the gap. But it's the box that's on the shelf.</p>
+<p class="slip">A common slip is to choose "are", because "fuses" sits right before the gap. But it's the box that's on the shelf.</p>
 <ul><li><b>Each, every, everyone, one of</b> always take is / has.</li><li><b>Two things joined by "and"</b> take are / have.</li></ul>`,
 make(){return shuffle(AGREE).slice(0,8).map(([s,a,b,subj,n])=>{const o=shuffle([a,b]);return{q:s,o,a:o.indexOf(a),short:true,s:`The subject is "${subj}", which is ${n==='one'?'one thing':'more than one'}, so "${a}".`}})}},
 
@@ -95,7 +95,7 @@ lesson:`<p>Two complete sentences can't be joined with just a comma. That mistak
 <div><span class="y">✓</span> The power was off. We started work. <span class="muted">(full stop, then a capital)</span></div>
 <div><span class="y">✓</span> The power was off; we started work. <span class="muted">(semicolon)</span></div>
 <div><span class="y">✓</span> The power was off, so we started work. <span class="muted">(linking word)</span></div></div>
-<p>Linking words: <b>so, because, but, and, although, when</b>. They make writing flow better too, which helps his writing marks.</p>
+<p>Linking words: <b>so, because, but, and, although, when</b>. They make writing flow better too, which helps your writing marks.</p>
 <p class="slip">Test: if both halves could stand alone as sentences, a comma on its own isn't enough.</p>`,
 make(){return shuffle(JOIN).slice(0,8).map(([a,b,l])=>{
  const right=[`${a}. ${cap(b)}.`,`${a}; ${b}.`,(l==='so'||l==='but')?`${a}, ${l} ${b}.`:`${a} ${l} ${b}.`][r(0,2)];
@@ -105,9 +105,9 @@ make(){return shuffle(JOIN).slice(0,8).map(([a,b,l])=>{
 
 {id:'s3',title:'Tricky spellings',sub:'Words used in college and work, with memory tricks',
 lesson:`<p>Some words trip up almost everyone. The fix is a memory trick for each one, then practice. Read the tricks out loud.</p>
-<ul>${SPELL.slice(0,6).map(w=>`<li><b>${w[0]}</b>: ${w[4]}</li>`).join('')}</ul>
-<p class="slip">In the check he chose "seperate". Remember: there's <b>a rat</b> in sep<b>arat</b>e.</p>
-<p>Tip: when he gets one wrong, write it out three times on paper while saying the trick.</p>`,
+<ul>${SPELL.map(w=>`<li><b>${w[0]}</b>: ${w[4]}</li>`).join('')}</ul>
+<p class="slip">The most common slip is "seperate". Remember: there's <b>a rat</b> in sep<b>arat</b>e.</p>
+<p>Tip: when you get one wrong, write it out three times on paper while saying the trick.</p>`,
 make(){return shuffle(SPELL).slice(0,8).map(w=>{const o=shuffle(w.slice(0,4));return{q:'Which spelling is correct?',o,a:o.indexOf(w[0]),short:true,s:`${w[0]}: ${w[4]}`}})}},
 
 {id:'s4',title:'Working out new words',sub:'Using clues in the sentence',
