@@ -43,18 +43,17 @@ gen(){const [u,v]=pick([['a','b'],['x','y'],['m','n'],['p','q']]);
  while(o.length<4){const x=f(A+o.length,B);if(!o.includes(x))o.push(x)}
  shuffle(o);return{mc:true,q:`Simplify ${expr}`,o,a:o.indexOf(c),s:s+` Answer: ${c}`}}},
 
-{id:'s3',title:'Using formulas',sub:'Ohm’s law and power, the maths electricians use daily',
-lesson:`<p>A formula is a rule written with letters. Substitute the numbers you know, then calculate. These two come up constantly on the electrical course:</p>
-<ul><li><b>V = I × R</b> (Ohm's law). V is voltage in volts (V), I is current in amps (A), R is resistance in ohms (Ω).</li>
-<li><b>P = V × I</b>. P is power in watts (W).</li>
-<li>Turned round: <b>I = V ÷ R</b> and <b>I = P ÷ V</b>.</li></ul>
-<div class="work"><span class="eyebrow">Worked example</span><div>I = 3 A and R = 4 Ω. Find V.</div><div>V = I × R</div><div>V = 3 × 4 = <b>12 V</b></div></div>
-<div class="work"><span class="eyebrow">Worked example</span><div>A 2300 W kettle runs on 230 V. Find the current.</div><div>I = P ÷ V</div><div>I = 2300 ÷ 230 = <b>10 A</b></div></div>`,
+{id:'s3',title:'Using formulas',sub:'Putting numbers into a rule',
+lesson:`<p>A <b>formula</b> is a rule for working something out, written with letters. To use it, <b>substitute</b>: swap each letter for its number, then work it out.</p>
+<p>Remember: a number next to a letter means multiply. Do × before + or −.</p>
+<div class="work"><span class="eyebrow">Worked example</span><div>Cost of maggots: <b>C = 3n</b>, where n is the number of tubs.</div><div>For 4 tubs: C = 3 × 4 = <b>£12</b></div></div>
+<div class="work"><span class="eyebrow">Worked example</span><div>Taxi fare: <b>F = 2m + 5</b>, where m is the number of miles.</div><div>For 6 miles: 2 × 6 = 12, then 12 + 5 = <b>£17</b></div></div>
+<p class="slip">Multiply first, then add. For 6 miles the answer is 2 × 6 + 5 = 17, not 2 × 11 = 22.</p>`,
 gen(){const t=r(0,3);
- if(t===0){const I=r(2,12),R=r(2,20);return{q:`A current of ${I} A flows through a resistance of ${R} Ω. Use V = I × R to find the voltage.`,a:I*R,u:'V',s:`V = ${I} × ${R} = ${I*R} V`}}
- if(t===1){const V=pick([12,24,230]),I=r(2,10);return{q:`A device runs on ${V} V and draws ${I} A. Use P = V × I to find the power.`,a:V*I,u:'W',s:`P = ${V} × ${I} = ${V*I} W`}}
- if(t===2){const R=r(2,12),I=r(2,10),V=I*R;return{q:`${V} V is across a resistance of ${R} Ω. Use I = V ÷ R to find the current.`,a:I,u:'A',s:`I = ${V} ÷ ${R} = ${I} A`}}
- const I=r(2,13),P=230*I;return{q:`A ${P} W heater runs on 230 V. Use I = P ÷ V to find the current.`,a:I,u:'A',s:`I = ${P} ÷ 230 = ${I} A`}}},
+ if(t===0){const p=pick([2,3,4,5]),n=r(2,9);return{q:`Tubs of maggots cost £${p} each. The formula is C = ${p}n, where n is the number of tubs. Find C when n = ${n}.`,a:p*n,u:'£',pre:true,s:`C = ${p} × ${n} = £${p*n}`}}
+ if(t===1){const a=pick([2,3]),b=pick([4,5,6]),m=r(2,10);return{q:`A taxi fare in pounds is F = ${a}m + ${b}, where m is the number of miles. Find F when m = ${m}.`,a:a*m+b,u:'£',pre:true,s:`${a} × ${m} = ${a*m}, then ${a*m} + ${b} = £${a*m+b}`}}
+ if(t===2){const h=r(3,8),w=pick([8,9,10,12]);return{q:`Pay is worked out with P = ${w}h, where h is the number of hours worked. Find P when h = ${h}.`,a:w*h,u:'£',pre:true,s:`P = ${w} × ${h} = £${w*h}`}}
+ const l=r(3,12),w=r(2,9);return{q:`The perimeter of a rectangle is P = 2l + 2w. Find P when l = ${l} and w = ${w}.`,a:2*l+2*w,s:`2 × ${l} = ${2*l} and 2 × ${w} = ${2*w}. ${2*l} + ${2*w} = ${2*l+2*w}`}}},
 
 {id:'s4',title:'Sharing in a ratio',sub:'Splitting an amount into parts',
 lesson:`<p>A ratio like <b>2 : 3</b> means for every 2 parts one side gets, the other gets 3. Three steps:</p>

@@ -8,6 +8,7 @@ import maths2 from './maths2.js';
 import english2 from './english2.js';
 import science2 from './science2.js';
 import electrical2 from './electrical2.js';
+import electrical0 from './electrical0.js';
 
 const def = (id, prefix, name, sessions, extra = {}) =>
   [id, { name, ...extra, sessions: sessions.map(s => ({ ...s, key: prefix + '-' + s.id, subject: id })) }];
@@ -16,10 +17,10 @@ const def = (id, prefix, name, sessions, extra = {}) =>
 export const SUBJECTS = Object.fromEntries([
   def('maths', 'm', 'Maths', [...maths, ...maths2], { core: true, icon: '×', qual: 'GCSE' }),
   def('english', 'e', 'English', [...english, ...english2], { core: true, icon: 'Aa', qual: 'GCSE' }),
-  def('science', 'sc', 'Science', [...science, ...science2], { icon: '⚗', qual: 'IGCSE Double Award' }),
+  def('science', 'sc', 'Science', [...science.filter(s => s.id !== 's2'), ...science2, ...science.filter(s => s.id === 's2')], { icon: '⚗', qual: 'IGCSE Double Award' }),
   def('statistics', 'st', 'Statistics', statistics, { icon: '%', qual: 'GCSE' }),
   def('business', 'b', 'Business', business, { icon: '£', qual: 'GCSE' }),
-  def('electrical', 'el', 'Electrical', [...electrical, ...electrical2], { icon: '⚡', qual: 'Getting ready for college' }),
+  def('electrical', 'el', 'Electrical', [...electrical0, ...electrical, ...electrical2], { icon: '⚡', qual: 'Getting ready for college' }),
 ]);
 
 /** Extra lessons by weekday (0 = Sunday). Maths and English every weekday. No lessons at weekends. */

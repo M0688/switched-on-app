@@ -9,7 +9,7 @@ const S = [
 <h3>The four main dangers</h3>
 ${ul(['<b>Electric shock:</b> current flows through your body when you become part of the circuit, usually between a live part and earth. It can stop your heart or lock your muscles so you can’t let go.', '<b>Burns:</b> current heats the body where it enters and leaves.', '<b>Fire:</b> overloaded cables and loose connections overheat.', '<b>Arc flash:</b> a blast of heat and light when current jumps through the air during a fault.'])}
 <p>It takes very little current to kill. About <b>50 milliamps</b> (0.05 A) through the chest can stop the heart. A kettle uses about 10 A, which is 200 times more.</p>
-${ex('What makes a shock worse', 'More current → more harm', 'Path through the chest/heart → most dangerous', 'Longer time → more harm', 'Wet skin → lower resistance → more current flows')}
+${ex('What makes a shock worse', 'More current → more harm', 'Path through the chest/heart → most dangerous', 'Longer time → more harm', 'Wet skin → electricity flows into you more easily → more current')}
 ${slip('If someone is being shocked, don’t touch them. Switch off the supply first, then call 999.')}`,
   make: fromBank([
     ['What is the normal mains voltage in a UK home?', '230 V', '110 V', '12 V', '1000 V', 'UK homes are supplied at 230 V AC.'],
@@ -17,7 +17,7 @@ ${slip('If someone is being shocked, don’t touch them. Switch off the supply f
     ['Portable power tools on UK building sites usually run at:', '110 V', '230 V', '400 V', '5 V', 'Sites use 110 V tools (yellow plugs) because a shock from them is much less dangerous.'],
     ['Roughly how much current through the chest can be fatal?', 'About 50 mA', 'About 50 A', 'About 13 A', 'About 100 A', '50 milliamps is just 0.05 A. Tiny currents can kill.'],
     ['An electric shock happens when…', 'your body becomes part of a circuit', 'you stand near a cable', 'a fuse blows', 'a light is switched off', 'Current only flows through you if you complete a path, for example from a live part to earth.'],
-    ['Why are wet hands more dangerous around electricity?', 'Water lowers skin resistance, so more current flows', 'Water is an insulator', 'Water raises the voltage', 'They aren’t more dangerous', 'Lower resistance means more current for the same voltage (I = V ÷ R).'],
+    ['Why are wet hands more dangerous around electricity?', 'Electricity flows through wet skin more easily, so more current flows', 'Water is an insulator', 'Water raises the voltage', 'They aren’t more dangerous', 'Your body conducts better when wet, so more current can flow through you.'],
     ['Overloaded cables and loose connections mainly cause:', 'Fire', 'Floods', 'Lower bills', 'Brighter lights', 'Too much current or a poor connection makes heat, which can start a fire.'],
     ['Someone is being shocked and is still holding the cable. What do you do first?', 'Switch off the supply', 'Pull them off with your hands', 'Throw water on them', 'Wait for it to stop', 'If you touch them, the current can pass through you too. Isolate the supply first.'],
     ['An arc flash is…', 'a blast of heat and light from current jumping through air', 'a type of torch', 'a safety sign', 'a fuse rating', 'Arc flashes cause serious burns and eye injuries during faults.'],
@@ -135,7 +135,7 @@ ${ex('UK plugs', 'Brown to the bottom right (with the fuse), blue to the bottom 
 {
   id: 's6', title: 'Units and circuits', sub: 'Volts, amps, ohms, watts; series and parallel',
   lesson: `${table(['Quantity', 'Symbol', 'Unit', 'Think of it as'], [['Voltage', 'V', 'volt (V)', 'The push'], ['Current', 'I', 'amp (A)', 'The flow'], ['Resistance', 'R', 'ohm (Ω)', 'What slows the flow'], ['Power', 'P', 'watt (W)', 'How fast energy is used']])}
-<p>Link to maths: <b>V = I × R</b> and <b>P = V × I</b>. Bills charge for energy in <b>kilowatt-hours (kWh)</b>.</p>
+<p>Electricity bills charge for energy in <b>kilowatt-hours (kWh)</b>: 1 kWh is 1000 watts used for one hour.</p>
 <p><b>Conductors</b> let current flow easily (copper, used for cable cores). <b>Insulators</b> don't (PVC, rubber, used for cable sheaths).</p>
 ${ex('Series and parallel', 'Series: one path. If one lamp fails, they all go out.', 'Parallel: separate paths. Each gets the full voltage and works on its own. Houses are wired in parallel.')}
 ${ex('Prefixes', 'milli (m) = one thousandth: 30 mA = 0.03 A', 'kilo (k) = one thousand: 3 kW = 3000 W')}
@@ -153,7 +153,6 @@ ${ex('Prefixes', 'milli (m) = one thousandth: 30 mA = 0.03 A', 'kilo (k) = one t
     ['3 kW in watts is…', '3000 W', '300 W', '30 W', '0.003 W', 'kilo means thousand: 3 × 1000 = 3000.'],
     ['A battery supplies…', 'DC', 'AC', '230 V', '50 Hz', 'Batteries give direct current, flowing one way.'],
     ['Electricity bills charge for energy in…', 'kilowatt-hours (kWh)', 'amps', 'volts', 'ohms', '1 kWh is 1000 W used for one hour.'],
-    ['Using P = V × I, what is 230 V × 10 A?', '2300 W', '240 W', '23 W', '2.3 W', '230 × 10 = 2300 watts.'],
   ]),
 },
 ];

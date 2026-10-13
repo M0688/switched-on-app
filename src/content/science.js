@@ -29,7 +29,8 @@ ${slip('Small unit to big unit: divide. Big unit to small unit: multiply.')}`,
 },
 {
   id: 's2', title: 'Electric circuits', sub: 'Physics: current, charge, voltage and energy',
-  lesson: `<p>Current is the <b>rate of flow of charge</b>: how much charge passes each second. Charge is measured in <b>coulombs (C)</b>. 1 amp = 1 coulomb per second.</p>
+  lesson: `<p>Electricity flows round a complete loop called a <b>circuit</b>. Voltage is the push, current is the flow (see the Electrical lessons “What is electricity?” and “Volts, amps and watts” if this is new).</p>
+<p>Current is the <b>rate of flow of charge</b>: how much charge passes each second. Charge is measured in <b>coulombs (C)</b>. 1 amp = 1 coulomb per second.</p>
 ${table(['Equation', 'Meaning'], [['Q = I × t', 'charge (C) = current (A) × time (s)'], ['V = I × R', 'voltage (V) = current (A) × resistance (Ω)'], ['P = I × V', 'power (W) = current (A) × voltage (V)'], ['E = I × V × t', 'energy (J) = current × voltage × time (s)']])}
 ${ul(['An <b>ammeter</b> measures current. It goes <b>in series</b> (in the loop).', 'A <b>voltmeter</b> measures voltage. It goes <b>in parallel</b> (across the component).', 'In a <b>series</b> circuit, the current is the same everywhere.', 'In a <b>parallel</b> circuit, each branch has the full voltage.'])}
 ${ex('Worked example', 'A current of 2 A flows for 30 s. How much charge flows?', 'Q = I × t = 2 × 30 = <b>60 C</b>')}
