@@ -34,7 +34,7 @@ ${ex('Efficiency', 'efficiency = useful energy out ÷ total energy in', 'A bulb 
     ['A moving car has energy in its…', 'kinetic store', 'nuclear store', 'elastic store', 'magnetic store', 'Moving objects have kinetic energy.'],
     ['A stretched spring stores energy in its…', 'elastic store', 'thermal store', 'chemical store', 'kinetic store', 'Stretching or squashing stores elastic energy.'],
     ['A rock at the top of a cliff has energy in its…', 'gravitational store', 'kinetic store', 'chemical store', 'elastic store', 'Height above the ground means gravitational energy.'],
-    ['Energy wasted by machines usually ends up as…', 'heat in the surroundings', 'new energy', 'nothing at all', 'more electricity', 'Wasted energy spreads out as heat.'],
+    ['Energy wasted by machines usually ends up as…', 'heat in the surroundings', 'new energy that wasn’t there', 'nothing at all; it disappears', 'more electricity in the wires', 'Wasted energy spreads out as heat.'],
     ['Which is true?', 'Energy can’t be created or destroyed', 'Energy can be destroyed', 'Machines make energy', 'Efficient machines create energy', 'It only moves between stores.'],
     ['A kettle transfers energy by…', 'electrical current, then heating', 'radiation only', 'sound only', 'magnetism only', 'Electricity heats the element, which heats the water.'],
   ], () => {

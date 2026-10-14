@@ -80,12 +80,12 @@ ${slip('A bigger sample is usually more reliable, but only if it’s chosen fair
   make: fromBank([
     ['Asking every single person in the population is a…', 'census', 'sample', 'pilot', 'bias', 'A census covers everyone.'],
     ['Why use a sample instead of a census?', 'It’s quicker and cheaper', 'It’s always more accurate', 'It includes everyone', 'It’s required by law', 'Samples save time and money.'],
-    ['In a random sample, every member…', 'has an equal chance of being picked', 'is picked', 'is over 18', 'chooses themselves', 'That’s what makes it fair.'],
+    ['In a random sample, every member…', 'has an equal chance of being picked', 'is picked to take part in the survey', 'is over 18 years old', 'chooses themselves whether to take part', 'That’s what makes it fair.'],
     ['Asking only people at a gym how often they exercise is…', 'biased', 'random', 'a census', 'secondary data', 'Gym-goers exercise more than most people.'],
-    ['The population is…', 'the whole group you want to know about', 'everyone in the UK', 'the people you asked', 'the answers', 'It depends on your question.'],
+    ['The population is…', 'the whole group you want to know about', 'everyone in the UK, whatever the question', 'only the people you actually asked', 'the answers people gave you', 'It depends on your question.'],
     ['Which sample is likely to be more reliable?', '100 people chosen at random', '5 friends', '20 people in one shop', 'Only your family', 'Larger and random is better.'],
     ['A survey question "Don’t you agree college is great?" is…', 'a leading (biased) question', 'a fair question', 'a census', 'random', 'It pushes people towards an answer.'],
-    ['One way to pick a random sample is…', 'number everyone and use a random number generator', 'ask the first people you see', 'ask your friends', 'ask volunteers', 'Random number generators give everyone an equal chance.'],
+    ['One way to pick a random sample is…', 'number everyone and use a random number generator', 'ask the first people you see in the street that day', 'ask your friends and their friends to take part', 'ask for volunteers to put their names forward', 'Random number generators give everyone an equal chance.'],
     ['A small trial run of a survey is called a…', 'pilot study', 'census', 'population', 'bias', 'It helps fix problems before the real survey.'],
     ['A sample that leaves out a group is…', 'biased', 'random', 'complete', 'a census', 'It won’t represent the whole population.'],
   ]),
@@ -123,7 +123,7 @@ ${table(['Pets', 'Frequency'], [['0', '4'], ['1', '6'], ['2', '3'], ['3', '2']])
 ${ex('From the table above', 'Total people: 4 + 6 + 3 + 2 = 15', 'Mode: 1 pet (highest frequency, 6)', 'Mean: (0×4 + 1×6 + 2×3 + 3×2) ÷ 15 = 18 ÷ 15 = 1.2')}
 ${slip('The mode is the value (1 pet), not the frequency (6).')}`,
   make: mixed([
-    ['In a frequency table, the frequency is…', 'how many times a value appears', 'the value itself', 'the total of all values', 'the mean', 'Frequency = how often.'],
+    ['In a frequency table, the frequency is…', 'how many times a value appears', 'the value itself', 'the total of all the values', 'the mean of the values', 'Frequency = how often.'],
     ['Tally marks are grouped in…', 'fives', 'tens', 'twos', 'threes', 'Four lines and one across makes five.'],
   ], freqQ, 6),
 },

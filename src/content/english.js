@@ -50,33 +50,33 @@ const SPELL=[
 ];
 /* Session 4: meaning from context. [sentence with *word*, answer, wrong x3, clue] */
 const CTX=[
- ['The socket was *isolated*, so it was safe to work on.','cut off from the power supply','lonely','far away','broken','"so it was safe to work on" tells you the power had been cut off.'],
- ['The instructions were *ambiguous*, so two people did the job two different ways.','could be understood in more than one way','very long','badly printed','easy to follow','Two people read them differently, so they were unclear.'],
- ['Wear goggles to protect your eyes from *debris*.','small bits of broken material','bright sunlight','loud noise','water','Goggles protect from things flying into your eyes.'],
+ ['The socket was *isolated*, so it was safe to work on.','cut off from the power supply','lonely, with nobody else around','a long way from anywhere else','broken and in need of a repair','"so it was safe to work on" tells you the power had been cut off.'],
+ ['The instructions were *ambiguous*, so two people did the job two different ways.','could be understood in more than one way','very long, with far too many pages','badly printed and hard to read','clear and easy to follow, step by step','Two people read them differently, so they were unclear.'],
+ ['Wear goggles to protect your eyes from *debris*.','small bits of broken material','bright sunlight and glare','a loud, high-pitched noise','splashes of dirty water','Goggles protect from things flying into your eyes.'],
  ['The cable was *concealed* behind the plasterboard.','hidden','damaged','joined','painted','Behind plasterboard, you can’t see it.'],
  ['He was *reluctant* to climb the ladder, so he asked for help.','unwilling','excited','quick','able','He asked for help instead of doing it, so he didn’t want to.'],
  ['After forty years, the old wiring had *deteriorated*.','got worse','been replaced','got stronger','been tested','"Old" and "forty years" suggest it got worse with age.'],
  ['You must *comply* with the safety rules on site.','follow','argue with','write','forget','"You must" plus "safety rules" means do what they say.'],
- ['The fault was *intermittent*: sometimes the light worked, sometimes it didn’t.','stopping and starting','permanent','dangerous','very loud','The rest of the sentence explains it: sometimes on, sometimes off.'],
- ['Copper is a good *conductor*, so electricity flows through it easily.','material that lets electricity pass through','person on a bus','type of insulation','tool for cutting','"Electricity flows through it easily."'],
- ['The supervisor will *verify* the readings before signing them off.','check they are correct','throw away','guess','copy out','You check something before you sign it off.'],
- ['The workshop was *cramped*, with barely room to turn around.','small and crowded','cold','noisy','tidy','"Barely room to turn around."'],
+ ['The fault was *intermittent*: sometimes the light worked, sometimes it didn’t.','stopping and starting','there all the time','dangerous to touch','very loud and buzzing','The rest of the sentence explains it: sometimes on, sometimes off.'],
+ ['Copper is a good *conductor*, so electricity flows through it easily.','material that lets electricity pass through','person who takes fares on a bus','plastic that stops electricity escaping','tool used for cutting thick wire','"Electricity flows through it easily."'],
+ ['The supervisor will *verify* the readings before signing them off.','check they are correct','throw them all away','guess what they are','copy them out neatly','You check something before you sign it off.'],
+ ['The workshop was *cramped*, with barely room to turn around.','small and crowded','cold and damp','noisy and busy','tidy and organised','"Barely room to turn around."'],
  ['She gave a *brief* explanation, then let us start.','short','confusing','angry','long','She explained, then let us start straight away.'],
 ];
 /* Session 5: reading between the lines. [passage, question, answer, wrong x3, clue] */
 const INF=[
- ['Mia checked the ladder twice before climbing. Last year, a loose rung had sent her workmate to hospital.','Why does Mia check the ladder twice?','She remembers someone getting hurt','She is scared of heights','Her boss told her to','The ladder is new','The second sentence explains it: a loose rung hurt her workmate.'],
- ['Tom read the letter, grinned, and punched the air. Then he rang his gran.','How does Tom feel about the letter?','Happy and excited','Worried','Angry','Bored','Grinning and punching the air are signs of joy.'],
+ ['Mia checked the ladder twice before climbing. Last year, a loose rung had sent her workmate to hospital.','Why does Mia check the ladder twice?','She remembers someone getting hurt','She is scared of heights','Her boss told her to check it','The ladder is brand new','The second sentence explains it: a loose rung hurt her workmate.'],
+ ['Tom read the letter, grinned, and punched the air. Then he rang his gran.','How does Tom feel about the letter?','Happy and excited','Worried and upset','Angry and annoyed','Bored and fed up','Grinning and punching the air are signs of joy.'],
  ['The customer kept looking at her watch and tapping her foot while Ravi worked.','What does this suggest about the customer?','She is impatient','She is cold','She likes Ravi','She is tired','Watch-checking and foot-tapping show someone in a hurry.'],
- ['Ellie switched off the main power, locked the switch with a padlock, and kept the key in her pocket.','Why did Ellie keep the key in her pocket?','So nobody could switch the power back on','So she wouldn’t lose it','Because the key was valuable','Because she always does','If she has the key, no one else can unlock the switch while she works.'],
+ ['Ellie switched off the main power, locked the switch with a padlock, and kept the key in her pocket.','Why did Ellie keep the key in her pocket?','So nobody could switch the power back on','So she wouldn’t lose it in the workshop','Because the key was valuable and old','Because she always keeps keys in that pocket','If she has the key, no one else can unlock the switch while she works.'],
  ['The van wouldn’t start. Dan looked at the fuel gauge and groaned.','Why probably didn’t the van start?','It had run out of fuel','The battery was flat','Dan had the wrong key','It was too cold','He looks at the fuel gauge and groans: it’s empty.'],
  ['When the inspector walked in, the apprentices suddenly started sweeping the floor.','What does this suggest?','They wanted to look busy','The floor was always clean','The inspector asked them to','They love sweeping','"Suddenly" shows they started only because the inspector arrived.'],
  ['Sam’s answer was one word: "Fine." He didn’t look up from his phone.','How does Sam probably feel?','He doesn’t want to talk','He is delighted','He is confused','He is very busy at work','A one-word reply without eye contact shows he isn’t interested in talking.'],
- ['The old house had cloth-covered wires and a wooden fuse box. The electrician shook her head slowly.','What does the electrician think?','The wiring is old and unsafe','The house is lovely','She is lost','The job will be easy','Shaking her head slowly shows she is unhappy with what she sees.'],
+ ['The old house had cloth-covered wires and a wooden fuse box. The electrician shook her head slowly.','What does the electrician think?','The wiring is old and unsafe','The house is lovely and cosy','She is lost and in the wrong house','The job will be quick and easy','Shaking her head slowly shows she is unhappy with what she sees.'],
  ['Priya had failed the test twice. This time she studied every evening for a month.','What does this tell us about Priya?','She is determined','She is lazy','She doesn’t care','She found it easy','She kept going after failing, and worked hard.'],
  ['The meter read 230 volts. Jamal stopped breathing.','Why does the writer say Jamal "stopped breathing"?','To show he was shocked and scared','He was holding his breath for fun','He had a medical problem','He was bored','People freeze and hold their breath when they get a fright.'],
  ['He opened the door. Silence. Then a crackle.','Why does the writer use such short sentences?','To build tension','Because the writer is lazy','To save space','To explain the science','Short sentences slow the reader down and make it feel tense.'],
- ['The workshop smelled of burning plastic, and a thin grey line of smoke rose from the bench.','What has probably happened?','Something has overheated','Someone is cooking','It is a cold day','The bench is new','Burning plastic and smoke point to something overheating.'],
+ ['The workshop smelled of burning plastic, and a thin grey line of smoke rose from the bench.','What has probably happened?','Something has overheated','Someone is cooking lunch nearby','It is a cold and frosty day','The bench has just been painted','Burning plastic and smoke point to something overheating.'],
 ];
 
 const S=[

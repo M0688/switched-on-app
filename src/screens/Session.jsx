@@ -103,7 +103,7 @@ export default function Session({ sessionKey, data, onSaved }) {
     const row = {
       session_key: session.key, subject: session.subject, score, total: list.length,
       duration_s: Math.round((Date.now() - started.current) / 1000),
-      details: list.map(q => ({ q: q.q, ok: q.ok, given: q.o ? q.o[q.chosen] : q.last, answer: q.o ? q.o[q.a] : String(q.a) })),
+      details: list.map(q => ({ q: q.q, kind: q.o ? 'mc' : 'number', ok: q.ok, given: q.o ? q.o[q.chosen] : q.last, answer: q.o ? q.o[q.a] : String(q.a) })),
     };
     try { const rowSaved = await saveAttempt(row); setSavedId(rowSaved.id); setSaved(score); setSaveErr(''); onSaved(); }
     catch (e) { setSaveErr(e.message); }

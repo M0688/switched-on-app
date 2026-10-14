@@ -4,7 +4,7 @@ import testing from './testing.js';
 import faults from './faults.js';
 import rework from './rework.js';
 import devices from './devices.js';
-import { placement } from './assessment.js';
+import { placement, isAssessment } from './assessment.js';
 
 /* Each lesson keeps the key it was written with (rb-b1, rf-f3, …), so old attempts still match.
    `PREFIX` is only used for new lessons added from the database (e.g. rph-d4). */
@@ -35,6 +35,22 @@ export const ALL = Object.values(SUBJECTS).flatMap(s => s.sessions);
 
 export const LEVELS = { 1: 'Core', 2: 'Bench', 3: 'Advanced' };
 
+/** Adaptive: if the last 3 lessons in a subject average under half marks, drop one level
+    (easier lessons come back into the plan) until the average recovers.
+    Only understanding questions count when we can tell them apart: if the multiple-choice questions
+    are going fine and it's the calculations going wrong, that's a maths gap, not a reason to make the
+    electronics easier (the weekly lesson writer adds "bench maths" lessons for that instead). */
+export const STRUGGLE = { lessons: 3, below: 0.5 };
+const isNumber = d => d.kind ? d.kind === 'number' : d.answer !== '' && !Number.isNaN(Number(d.answer));
+export function struggling(attempts, subject) {
+  const recent = attempts.filter(a => a.subject === subject && !isAssessment(a) && a.total)
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, STRUGGLE.lessons);
+  if (recent.length < 2) return false;
+  const concept = recent.flatMap(a => (Array.isArray(a.details) ? a.details : []).filter(d => !isNumber(d)));
+  if (concept.length >= 6) return concept.filter(d => d.ok).length / concept.length < STRUGGLE.below;
+  return recent.reduce((t, a) => t + a.score / a.total, 0) / recent.length < STRUGGLE.below;
+}
+
 /** The plan only uses lessons at or above each track's starting level (from the placement check).
     Skipped lessons stay available as extra practice. */
 const cache = new WeakMap();
@@ -44,7 +60,8 @@ export function planSubjects(attempts) {
   const out = {};
   for (const [id, subj] of Object.entries(SUBJECTS)) {
     const levels = PLACE_FROM[id].map(t => place[t]?.level).filter(Boolean);
-    const start = levels.length ? Math.min(...levels) : 1;
+    const placed = levels.length ? Math.min(...levels) : 1;
+    const start = struggling(attempts, id) ? Math.max(1, placed - 1) : placed;
     const lv = s => s.level ?? 2;
     const sorted = [...subj.sessions].sort((a, b) => lv(a) - lv(b)); // stable: keeps order within a level
     const kept = sorted.filter(s => lv(s) >= start);
