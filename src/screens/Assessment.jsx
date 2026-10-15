@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCourse } from '../lib/course.js';
 import { QUESTIONS, NOT_SURE, assessKey, levelFor } from '../content/repair/assessment.js';
 import { shuffle } from '../content/kit.js';
 import { saveAttempts } from '../lib/api.js';
+import { loadDraft, saveDraft, clearDraft } from '../lib/draft.js';
 
 function build() {
   return Object.entries(QUESTIONS).flatMap(([track, rows]) => rows.map(([level, q, right, ...wrong]) => {
@@ -14,12 +15,14 @@ function build() {
 /** Placement check: one question at a time, no marking until the end. */
 export default function Assessment({ onSaved }) {
   const course = useCourse();
-  const [qs, setQs] = useState(build);
-  const [i, setI] = useState(0);
+  const [draft] = useState(() => loadDraft('assess'));
+  const [qs, setQs] = useState(() => draft?.qs ?? build());
+  const [i, setI] = useState(() => draft?.i ?? 0);
   const [result, setResult] = useState(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const q = qs[i];
+  useEffect(() => { if (!result && qs.some(x => x.chosen != null)) saveDraft('assess', { qs, i }); }, [qs, i, result]);
 
   function choose(j) {
     setQs(list => list.map((x, k) => k === i ? { ...x, chosen: j } : x));
@@ -36,7 +39,7 @@ export default function Assessment({ onSaved }) {
         details: mine.map(x => ({ q: x.q, ok: x.chosen === x.a, given: x.chosen == null ? null : x.o[x.chosen], answer: x.o[x.a], level: x.level })),
       };
     });
-    try { await saveAttempts(rows); setResult(rows); onSaved(); }
+    try { await saveAttempts(rows); clearDraft('assess'); setResult(rows); onSaved(); }
     catch (e) { setErr(e.message); }
     setBusy(false);
   }

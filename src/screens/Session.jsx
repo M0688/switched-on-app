@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { makeSet } from '../content/index.js';
 import { findSession, isSkipped } from '../content/courses.js';
 import { useCourse } from '../lib/course.js';
+import { loadDraft, saveDraft, clearDraft } from '../lib/draft.js';
 import { lessonAccess } from '../lib/plan.js';
 import { saveAttempt } from '../lib/api.js';
 import { PASS } from '../lib/stats.js';
@@ -75,17 +76,20 @@ export default function Session({ sessionKey, data, onSaved }) {
     : lessonAccess(course.planSubjects(data.attempts), course.schedule, data.attempts, data.writings, sessionKey));
   const tried = data.attempts.some(a => a.session_key === sessionKey);
   const [showLesson, setShowLesson] = useState(!tried);
-  const [qs, setQs] = useState(() => session && !session.writing ? makeSet(session).map(q => ({ ...q })) : []);
+  // An unfinished set of questions for this lesson comes back as it was left.
+  const [draft] = useState(() => session && !session.writing ? loadDraft(sessionKey) : null);
+  const [qs, setQs] = useState(() => session && !session.writing ? (draft?.qs ?? makeSet(session).map(q => ({ ...q }))) : []);
   const [saved, setSaved] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [saveErr, setSaveErr] = useState('');
-  const started = useRef(Date.now());
+  const started = useRef(draft?.started ?? Date.now());
   const [help, setHelp] = useState(null);
   const threads = useRef({});
   const [, force] = useState(0);
   const saving = useRef(false);
   useEffect(() => {
     if (qs.length && qs.every(q => q.done) && saved == null && !saving.current) { saving.current = true; save(qs); }
+    else if (saved == null && qs.some(q => q.done || q.tries)) saveDraft(sessionKey, { qs, started: started.current });
   }, [qs]);
 
   const done = qs.filter(q => q.done).length, ok = qs.filter(q => q.ok).length;
@@ -105,7 +109,7 @@ export default function Session({ sessionKey, data, onSaved }) {
       duration_s: Math.round((Date.now() - started.current) / 1000),
       details: list.map(q => ({ q: q.q, kind: q.o ? 'mc' : 'number', ok: q.ok, given: q.o ? q.o[q.chosen] : q.last, answer: q.o ? q.o[q.a] : String(q.a) })),
     };
-    try { const rowSaved = await saveAttempt(row); setSavedId(rowSaved.id); setSaved(score); setSaveErr(''); onSaved(); }
+    try { const rowSaved = await saveAttempt(row); clearDraft(session.key); setSavedId(rowSaved.id); setSaved(score); setSaveErr(''); onSaved(); }
     catch (e) { setSaveErr(e.message); }
     saving.current = false;
   }
@@ -115,6 +119,7 @@ export default function Session({ sessionKey, data, onSaved }) {
   }
 
   function again() {
+    clearDraft(session.key);
     setQs(makeSet(session).map(q => ({ ...q }))); setSaved(null); setSavedId(null); threads.current = {}; started.current = Date.now();
     window.scrollTo({ top: 0 });
   }
