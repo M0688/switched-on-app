@@ -26,7 +26,7 @@ export const SUBJECTS = Object.fromEntries([
 
 /** Every weekday, every subject: one lesson of each in every block. */
 const ALL_DAYS = Object.keys(SUBJECTS);
-export const SCHEDULE = { 1: ALL_DAYS, 2: ALL_DAYS, 3: ALL_DAYS, 4: ALL_DAYS, 5: ALL_DAYS, 6: [], 0: [] };
+export const SCHEDULE = { 1: ALL_DAYS, 2: ALL_DAYS, 3: ALL_DAYS, 4: ALL_DAYS, 5: ALL_DAYS, 6: [], 0: [], allDay: true };
 
 /** The placement check still has five sections; this says which section sets each subject's start level. */
 const PLACE_FROM = { components: ['basics'], testing: ['testing'], pcbs: ['faults', 'rework'], phones: ['devices'], motherboards: ['devices'], consoles: ['devices'] };

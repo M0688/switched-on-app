@@ -2,7 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
 
 // Called every hour by pg_cron. At 1pm, 5pm and 9pm UK time on weekdays it reminds each student
-// (and each parent following a course of their own) that a study block has opened.
+// that a study block has opened; repair-course parents get one 9am reminder instead.
 // reminder_log makes sure each reminder goes out once.
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -43,18 +43,41 @@ async function pushTo(userIds: string[], msg: Record<string, unknown>) {
   return sent.filter(Boolean).length;
 }
 
+// Parents with a course of their own (circuit board repair): all of the day's lessons open at once,
+// so one reminder each weekday morning. The link opens "My course".
+const REPAIR_HOUR = 9;
+async function remindRepair(day: string) {
+  let n = 0;
+  const { data: adults } = await admin.from('profiles').select('id').eq('role', 'parent').eq('course', 'repair');
+  for (const s of adults ?? []) {
+    const { error } = await admin.from('reminder_log').insert({ user_id: s.id, day, block: 1 });
+    if (error) continue;
+    n += await pushTo([s.id], {
+      title: "Repair course: today's lessons are open",
+      body: `${REPAIR_SUBJECTS}: three lessons each, whenever suits you today.`,
+      tag: 'repair-block',
+      url: './#/me',
+    });
+  }
+  return n;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hourCycle: 'h23', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()).map((p) => [p.type, p.value]));
   const wd = ({ Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5 } as Record<string, number>)[parts.weekday] ?? 0;
-  const block = BLOCK_HOURS.indexOf(Number(parts.hour));
-  if (!wd || block === -1) return json({ sent: 0, reason: 'not a block time' });
+  const hour = Number(parts.hour);
+  const block = BLOCK_HOURS.indexOf(hour);
+  const repairTime = hour === REPAIR_HOUR;
+  if (!wd || (block === -1 && !repairTime)) return json({ sent: 0, reason: 'not a reminder time' });
   const day = `${parts.year}-${parts.month}-${parts.day}`;
+  let sent = 0;
+  if (repairTime) sent += await remindRepair(day);
+  if (block === -1) return json({ sent });
   const subjects = ['Maths', 'English', ...(SCHEDULE[wd] ?? [])];
   const list = subjects.slice(0, -1).join(', ') + ' and ' + subjects.at(-1);
 
   const { data: students } = await admin.from('profiles').select('id, display_name').eq('role', 'student');
-  let sent = 0;
   for (const s of students ?? []) {
     const { error } = await admin.from('reminder_log').insert({ user_id: s.id, day, block: block + 1 });
     if (error) continue;
@@ -66,17 +89,5 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Parents with a course of their own (circuit board repair). The link opens "My course".
-  const { data: adults } = await admin.from('profiles').select('id').eq('role', 'parent').eq('course', 'repair');
-  for (const s of adults ?? []) {
-    const { error } = await admin.from('reminder_log').insert({ user_id: s.id, day, block: block + 1 });
-    if (error) continue;
-    sent += await pushTo([s.id], {
-      title: block === 0 ? 'Repair course: block 1 is open' : `Repair course: block ${block + 1} of 3 is open`,
-      body: `${REPAIR_SUBJECTS}: one lesson each, about 15 minutes each.`,
-      tag: 'repair-block',
-      url: './#/me',
-    });
-  }
   return json({ sent });
 });

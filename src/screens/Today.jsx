@@ -56,7 +56,7 @@ export default function Today({ profile, data }) {
 
   let intro;
   if (weekend) intro = 'It\u2019s the weekend. No lessons today. Enjoy your time off; lessons are back on Monday.';
-  else if (allDone) intro = 'All 3 blocks done today. Brilliant work.';
+  else if (allDone) intro = course.schedule.allDay ? 'All of today\u2019s lessons done. Brilliant work.' : 'All 3 blocks done today. Brilliant work.';
   else if (plan.open === 0) intro = `Your first block opens at ${blockLabel(0)}. ${plan.lessonsTotal} lessons today, about ${course.lessonMinutes} minutes each.`;
   else if (waiting) intro = `Block done. The next one opens at ${blockLabel(plan.open)}.`;
   else intro = `${plan.lessonsDone} of ${plan.lessonsTotal} lessons done today. ${left} to go.`;
@@ -77,7 +77,7 @@ export default function Today({ profile, data }) {
           <span className="btn" style={{ alignSelf: 'flex-start' }}>Start</span>
         </a>
       )}
-      {!weekend && !needsPlacement && <BlockStrip plan={plan} />}
+      {!weekend && !needsPlacement && !course.schedule.allDay && <BlockStrip plan={plan} />}
       <PushSetup compact student />
 
       {!needsPlacement && <div className="stack" style={{ gap: 10 }}>

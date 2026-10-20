@@ -18,6 +18,8 @@ export function londonHour(d) {
 }
 /** How many blocks have opened by this moment (0-3). */
 export const blocksOpen = d => isWeekend(d) ? 0 : BLOCK_HOURS.filter(h => londonHour(d) >= h).length;
+/** Lessons open by this moment. A schedule marked allDay opens the whole day's lessons at once (weekdays). */
+export const opened = (schedule, d) => schedule?.allDay ? (isWeekend(d) ? 0 : PER_DAY) : blocksOpen(d);
 export const blockLabel = i => { const h = BLOCK_HOURS[i]; return `${h > 12 ? h - 12 : h}${h >= 12 ? 'pm' : 'am'}`; };
 
 export function scheduledOn(subjects, schedule, subj, d) {
@@ -51,7 +53,7 @@ export function replay(subjects, schedule, attempts, writings) {
     const next = nextLesson(sessions, tried[subj], best[subj], last[subj]);
     ev.planned = scheduledOn(subjects, schedule, subj, ev.created_at)
       && next.session.key === ev.session_key
-      && used < PER_DAY && used < blocksOpen(ev.created_at);
+      && used < PER_DAY && used < opened(schedule, ev.created_at);
     if (ev.planned) { slots[day][subj] = used + 1; ev.slot = used + 1; ev.review = next.review; }
     tried[subj].add(ev.session_key);
     last[subj][ev.session_key] = ev.created_at;
@@ -63,7 +65,7 @@ export function replay(subjects, schedule, attempts, writings) {
 /** Today's plan for the Today screen. */
 export function dayPlan(subjects, schedule, attempts, writings, now = new Date()) {
   const { events, tried, best, last, slots } = replay(subjects, schedule, attempts, writings);
-  const today = dayKey(now), open = blocksOpen(now);
+  const today = dayKey(now), open = opened(schedule, now);
   const subjectsToday = Object.keys(subjects).filter(id => scheduledOn(subjects, schedule, id, now));
   const items = subjectsToday.map(id => {
     const done = slots[today]?.[id] ?? 0;
@@ -93,7 +95,7 @@ export function lessonAccess(subjects, schedule, attempts, writings, key, now = 
   if (next.session.key !== key) {
     return tried[subj].has(key) ? { ok: true, planned: false } : { ok: false, why: 'You’ll get to this lesson soon. Do the ones on your Today screen first.' };
   }
-  const used = slots[dayKey(now)]?.[subj] ?? 0, open = blocksOpen(now);
+  const used = slots[dayKey(now)]?.[subj] ?? 0, open = opened(schedule, now);
   let why = null;
   if (isWeekend(now)) why = 'No lessons at weekends.';
   else if (!scheduledOn(subjects, schedule, subj, now)) why = `${subjects[subj].name} isn’t on today’s plan.`;

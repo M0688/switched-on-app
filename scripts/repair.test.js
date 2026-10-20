@@ -70,7 +70,7 @@ test('placement uses the latest attempt per track and skips easier lessons', () 
   assert.equal(lessonAttempts(a).length, 0);
 });
 
-test('repair plan: all six subjects every weekday, one of each per block, starting at placement level', () => {
+test('repair plan: all six subjects every weekday, three of each a day, starting at placement level', () => {
   const a = [ax('basics', 6)];
   const six = ['components', 'testing', 'pcbs', 'phones', 'motherboards', 'consoles'];
   // Monday 12 Oct 2026, 14:05 BST: block 1 open
@@ -84,8 +84,8 @@ test('repair plan: all six subjects every weekday, one of each per block, starti
   assert.equal(tue.items[5].next.key, 'rd-v4');
   const done = [...a, { session_key: 'rb-b5', subject: 'components', score: 7, total: 8, created_at: '2026-10-12T12:10:00Z' }];
   const acc = lessonAccess(repair.planSubjects(done), repair.schedule, done, [], 'rb-b6', new Date('2026-10-12T12:20:00Z'));
-  assert.equal(acc.ok, false); // block 2 opens at 5pm
-  assert.equal(lessonAccess(repair.planSubjects(done), repair.schedule, done, [], 'rb-b6', new Date('2026-10-12T16:05:00Z')).planned, true);
+  assert.equal(acc.ok, true); // all of the day's lessons are open at once
+  assert.equal(acc.planned, true);
 });
 
 test('database lessons go to the right course with their level', () => {
@@ -123,4 +123,20 @@ test('adaptive: wrong calculations alone do not drop the level; wrong understand
   const concept = [...a, att('rt-t3', [mc(0), mc(0), mc(0), mc(1), num(1), num(1), num(0), num(0)], 12),
     att('rt-t4', [mc(0), mc(0), mc(1), mc(0), num(1), num(0), num(0), num(0)], 13)];
   assert.equal(repair.planSubjects(concept).testing.sessions.some(s => s.level === 1), true);
+});
+
+test('repair lessons are all open from the start of a weekday; GCSE keeps its blocks', async () => {
+  const { COURSES } = await import('../src/content/courses.js');
+  const { lessonAccess, dayPlan } = await import('../src/lib/plan.js');
+  const r = COURSES.repair, g = COURSES.gcse;
+  const early = new Date('2026-10-20T06:30:00Z'); // Tue 7:30am UK
+  const plan = dayPlan(r.planSubjects([]), r.schedule, [], [], early);
+  assert.ok(plan.items.length > 0 && plan.items.every(i => i.canStart && i.open === 3));
+  const key = plan.items[0].next.key;
+  const done = [{ session_key: key, subject: plan.items[0].subject, score: 8, total: 8, created_at: '2026-10-20T06:40:00Z' }];
+  const next = dayPlan(r.planSubjects(done), r.schedule, done, [], new Date('2026-10-20T06:50:00Z')).items[0];
+  assert.equal(next.done, 1); assert.equal(next.canStart, true);
+  assert.equal(lessonAccess(r.planSubjects(done), r.schedule, done, [], next.next.key, new Date('2026-10-20T06:50:00Z')).ok, true);
+  assert.equal(dayPlan(g.planSubjects([]), g.schedule, [], [], early).items.every(i => !i.canStart), true);
+  assert.equal(dayPlan(r.planSubjects([]), r.schedule, [], [], new Date('2026-10-24T10:00:00Z')).items.length, 0); // Saturday
 });
