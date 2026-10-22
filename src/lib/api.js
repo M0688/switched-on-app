@@ -73,3 +73,12 @@ export async function logFishing(student, minutes, note) {
 export async function undoFishing(id) {
   return must(await supabase.from('fishing_log').delete().eq('id', id));
 }
+
+/** Reminder times chosen in Settings (up to 3 a weekday, 'HH:MM' in 15-minute steps). */
+export async function getReminderPrefs(userIds) {
+  return must(await supabase.from('reminder_prefs').select('*').in('user_id', userIds));
+}
+export async function saveReminderPrefs(userId, enabled, times) {
+  return must(await supabase.from('reminder_prefs')
+    .upsert({ user_id: userId, enabled, times, updated_at: new Date().toISOString() }).select().single());
+}

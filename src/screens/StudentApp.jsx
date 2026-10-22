@@ -10,6 +10,7 @@ import Help from './Help.jsx';
 import { isWeekend } from '../lib/stats.js';
 import { FishingPage } from '../components/Fishing.jsx';
 import Assessment from './Assessment.jsx';
+import Settings from './Settings.jsx';
 import { useCourse } from '../lib/course.js';
 
 export default function StudentApp({ profile, banner = null }) {
@@ -21,7 +22,7 @@ export default function StudentApp({ profile, banner = null }) {
   useEffect(() => { reload(); }, [reload]);
 
   const [top, arg] = route;
-  const tab = ['practice', 's', 'writing'].includes(top) ? 'practice' : top === 'progress' ? 'progress' : top === 'help' ? 'help' : 'today';
+  const tab = ['practice', 's', 'writing'].includes(top) ? 'practice' : top === 'progress' ? 'progress' : top === 'help' ? 'help' : top === 'settings' ? 'settings' : 'today';
 
   const weekend = isWeekend();
   // GCSE: everything closes at weekends. Repair: only lessons do; the tutor and placement check stay open.
@@ -37,11 +38,12 @@ export default function StudentApp({ profile, banner = null }) {
   else if (top === 'practice') body = <Practice data={data} />;
   else if (top === 'progress') body = <Progress profile={profile} data={data} self />;
   else if (top === 'help') body = <Help />;
+  else if (top === 'settings') body = <Settings profile={profile} />;
   else if (top === 'assess' && course.assessment) body = <Assessment onSaved={reload} />;
   else if (top === 'fishing' && course.rewards) body = <FishingPage data={data} />;
   else body = <Today profile={profile} data={data} />;
 
-  const tabs = weekend ? [['today', 'Today'], ['progress', 'Progress'], ...(course.weekendTutor ? [['help', 'Ask']] : [])]
-    : [['today', 'Today'], ['practice', 'Practice'], ['progress', 'Progress'], ['help', 'Ask']];
+  const tabs = weekend ? [['today', 'Today'], ['progress', 'Progress'], ...(course.weekendTutor ? [['help', 'Ask']] : []), ['settings', 'Settings']]
+    : [['today', 'Today'], ['practice', 'Practice'], ['progress', 'Progress'], ['help', 'Ask'], ['settings', 'Settings']];
   return <>{banner}{body}<Tabs current={tab} items={tabs} /></>;
 }
