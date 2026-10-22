@@ -109,7 +109,7 @@ export default function ParentApp({ profile }) {
         <FishingCard data={data} link="#/fishing" />
         <div className="card"><div className="row"><span className="eyebrow">Today</span><span className="spacer" />
           {!plan.weekend && <b className="num">{plan.lessonsDone} of {plan.lessonsTotal} lessons</b>}</div>
-          {plan.weekend ? <p className="muted">Weekend: no lessons. Back on Monday.</p> : <BlockStrip plan={plan} />}
+          {plan.weekend ? <p className="muted">Weekend: no lessons. Back on Monday.</p> : (SCHEDULE.allDay ? null : <BlockStrip plan={plan} />)}
           {plan.items.map(p => <div key={p.subject} className="row"><b>{p.name}</b>
             <span className="muted small num">{p.results.map(r => r.writing ? 'writing' : `${r.score}/8`).join(' \u00b7 ') || 'not started'}</span><span className="spacer" />
             <span className={'pill ' + (p.finished ? 'good' : p.done ? 'warn' : 'quiet')}>{p.done}/{PER_DAY}</span></div>)}

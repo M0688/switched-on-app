@@ -125,7 +125,7 @@ test('adaptive: wrong calculations alone do not drop the level; wrong understand
   assert.equal(repair.planSubjects(concept).testing.sessions.some(s => s.level === 1), true);
 });
 
-test('repair lessons are all open from the start of a weekday; GCSE keeps its blocks', async () => {
+test('repair and GCSE lessons are all open from the start of a weekday', async () => {
   const { COURSES } = await import('../src/content/courses.js');
   const { lessonAccess, dayPlan } = await import('../src/lib/plan.js');
   const r = COURSES.repair, g = COURSES.gcse;
@@ -137,6 +137,6 @@ test('repair lessons are all open from the start of a weekday; GCSE keeps its bl
   const next = dayPlan(r.planSubjects(done), r.schedule, done, [], new Date('2026-10-20T06:50:00Z')).items[0];
   assert.equal(next.done, 1); assert.equal(next.canStart, true);
   assert.equal(lessonAccess(r.planSubjects(done), r.schedule, done, [], next.next.key, new Date('2026-10-20T06:50:00Z')).ok, true);
-  assert.equal(dayPlan(g.planSubjects([]), g.schedule, [], [], early).items.every(i => !i.canStart), true);
+  assert.equal(dayPlan(g.planSubjects([]), g.schedule, [], [], early).items.every(i => i.canStart), true);
   assert.equal(dayPlan(r.planSubjects([]), r.schedule, [], [], new Date('2026-10-24T10:00:00Z')).items.length, 0); // Saturday
 });

@@ -31,6 +31,7 @@ export const SCHEDULE = {
   4: ['statistics', 'business'],
   5: ['science', 'electrical'],
   6: [], 0: [],
+  allDay: true, // all of the day's lessons open from the start of the day (no 1pm/5pm/9pm blocks)
 };
 
 export const ALL = Object.values(SUBJECTS).flatMap(s => s.sessions);

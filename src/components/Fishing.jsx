@@ -53,7 +53,7 @@ function WeekList({ week, parent }) {
           <b>{new Date(d + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' })}</b>
           {rows.map(l => (
             <div key={l.at} className="row small" style={{ marginTop: 4, flexWrap: 'nowrap' }}>
-              <span style={{ flex: 1, minWidth: 0 }}><span className="muted">{blockLabel(l.slot - 1)}</span> {SUBJECTS[l.subject].name}: {l.title}
+              <span style={{ flex: 1, minWidth: 0 }}><span className="muted">#{l.slot}</span> {SUBJECTS[l.subject].name}: {l.title}
                 {l.done && !l.writing && <span className="muted num"> · {l.score}/{l.total}</span>}
                 {parent && l.reason && <span className="err"> · {l.reason}</span>}</span>
               {l.counted ? <span className="pill good">+10m</span> : <span className="pill quiet">No time</span>}

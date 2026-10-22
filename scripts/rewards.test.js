@@ -25,19 +25,20 @@ test('blocks open at 1pm, 5pm and 9pm UK time; none at weekends', () => {
   assert.equal(blocksOpen(new Date(t(17, 20, 5))), 0);
 });
 
-test('he moves on whatever he scores, and each block unlocks the next lesson', () => {
-  const a = [A('m-s1', 2, t(12, 12, 10))];
-  const p = plan(a, t(12, 12, 30));
+test('he moves on whatever he scores, and all of the day\'s lessons are open from the start of the day', () => {
+  const a = [A('m-s1', 2, t(12, 7, 10))];
+  const p = plan(a, t(12, 7, 30));
   const maths = p.items.find(i => i.subject === 'maths');
-  assert.equal(maths.done, 1); assert.equal(maths.next.key, 'm-s2'); assert.equal(maths.canStart, false);
-  assert.equal(plan(a, t(12, 16, 1)).items.find(i => i.subject === 'maths').canStart, true);
+  assert.equal(maths.done, 1); assert.equal(maths.next.key, 'm-s2'); assert.equal(maths.canStart, true);
+  const three = [...a, A('m-s2', 6, t(12, 7, 40)), A('m-s3', 6, t(12, 7, 50))];
+  assert.equal(plan(three, t(12, 8)).items.find(i => i.subject === 'maths').finished, true);
   assert.deepEqual(p.items.map(i => i.subject), ['maths', 'english', 'science', 'electrical']);
 });
 
-test('lesson access: next lesson only when a block is open; earlier lessons always open for practice', () => {
-  const a = [A('m-s1', 8, t(12, 12, 10))];
-  assert.equal(lessonAccess(SUBJECTS, SCHEDULE, a, [], 'm-s2', new Date(t(12, 13))).ok, false);
-  assert.equal(lessonAccess(SUBJECTS, SCHEDULE, a, [], 'm-s2', new Date(t(12, 16, 5))).planned, true);
+test('lesson access: next lesson open any time on a weekday; earlier lessons always open for practice', () => {
+  const a = [A('m-s1', 8, t(12, 7, 10))];
+  assert.equal(lessonAccess(SUBJECTS, SCHEDULE, a, [], 'm-s2', new Date(t(12, 7, 20))).planned, true);
+  assert.equal(lessonAccess(SUBJECTS, SCHEDULE, a, [], 'm-s2', new Date(t(17, 10))).ok, false); // Saturday
   assert.deepEqual(lessonAccess(SUBJECTS, SCHEDULE, a, [], 'm-s1', new Date(t(12, 13))), { ok: true, planned: false });
   assert.equal(lessonAccess(SUBJECTS, SCHEDULE, a, [], 'm-s4', new Date(t(12, 16, 5))).ok, false);
 });
