@@ -83,10 +83,37 @@ export default function Session({ sessionKey, data, onSaved }) {
   const [savedId, setSavedId] = useState(null);
   const [saveErr, setSaveErr] = useState('');
   const started = useRef(draft?.started ?? Date.now());
+  // New lessons: the questions stay locked for a short while so the explanation gets read first.
+  const lockSecs = course.readFirst && !tried && !draft ? course.readFirst : 0;
+  const [now, setNow] = useState(Date.now());
+  const waitLeft = Math.max(0, Math.ceil(lockSecs - (now - started.current) / 1000));
+  useEffect(() => { if (waitLeft > 0) { const t = setTimeout(() => setNow(Date.now()), 1000); return () => clearTimeout(t); } }, [waitLeft, now]);
   const [help, setHelp] = useState(null);
   const threads = useRef({});
   const [, force] = useState(0);
   const saving = useRef(false);
+
+  // Leaving the app while the questions are showing (e.g. to look answers up elsewhere) is recorded
+  // per question: seconds away, and how soon after coming back the answer was given. Parents see it.
+  const away = useRef({ ms: 0, since: null, back: null });
+  const live = waitLeft === 0 && saved == null;
+  useEffect(() => {
+    if (draft?.hiddenAt) { away.current.ms += Date.now() - draft.hiddenAt; away.current.back = Date.now(); }
+  }, []);
+  useEffect(() => {
+    if (!live) return;
+    const onVis = () => {
+      const a = away.current;
+      if (document.visibilityState === 'hidden') {
+        a.since = Date.now();
+        saveDraft(sessionKey, { qs: qsRef.current, started: started.current, hiddenAt: a.since });
+      } else if (a.since) { a.ms += Date.now() - a.since; a.since = null; a.back = Date.now(); }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [live]);
+  const qsRef = useRef(qs); qsRef.current = qs;
+
   useEffect(() => {
     if (qs.length && qs.every(q => q.done) && saved == null && !saving.current) { saving.current = true; save(qs); }
     else if (saved == null && qs.some(q => q.done || q.tries)) saveDraft(sessionKey, { qs, started: started.current });
@@ -107,7 +134,9 @@ export default function Session({ sessionKey, data, onSaved }) {
     const row = {
       session_key: session.key, subject: session.subject, score, total: list.length,
       duration_s: Math.round((Date.now() - started.current) / 1000),
-      details: list.map(q => ({ q: q.q, kind: q.o ? 'mc' : 'number', ok: q.ok, given: q.o ? q.o[q.chosen] : q.last, answer: q.o ? q.o[q.a] : String(q.a) })),
+      details: list.map(q => ({ q: q.q, kind: q.o ? 'mc' : 'number', ok: q.ok, given: q.o ? q.o[q.chosen] : q.last, answer: q.o ? q.o[q.a] : String(q.a),
+        options: q.o ?? undefined, tries: q.tries ?? 1, secs: q.at ? Math.round((q.at - started.current) / 1000) : null,
+        away: q.away || 0, afterBack: q.afterBack ?? null })),
     };
     try { const rowSaved = await saveAttempt(row); clearDraft(session.key); setSavedId(rowSaved.id); setSaved(score); setSaveErr(''); onSaved(); }
     catch (e) { setSaveErr(e.message); }
@@ -115,7 +144,13 @@ export default function Session({ sessionKey, data, onSaved }) {
   }
 
   function answer(i, patch) {
-    setQs(list => list.map((q, k) => k === i ? { ...q, ...patch } : q));
+    let stamp = {};
+    if (patch.done) {
+      const a = away.current, t = Date.now();
+      stamp = { at: t, away: Math.round(a.ms / 1000), afterBack: a.back ? Math.round((t - a.back) / 1000) : null };
+      a.ms = 0; a.back = null;
+    }
+    setQs(list => list.map((q, k) => k === i ? { ...q, ...patch, ...stamp } : q));
   }
 
   function again() {
@@ -141,8 +176,10 @@ export default function Session({ sessionKey, data, onSaved }) {
       </div>
 
       <h2>Practice</h2>
-      <p className="muted small" style={{ marginTop: -8 }}>Have a go at every question yourself. Once you've answered, you can ask the tutor about it.</p>
-      {qs.map((q, i) => <Question key={i + q.q} q={q} n={i + 1} onAnswer={p => answer(i, p)} onHelp={() => setHelp(i)} />)}
+      <p className="muted small" style={{ marginTop: -8 }}>Have a go at every question yourself. Once you've answered, you can ask the tutor about it.{course.rewards ? ' Leaving the app during the questions is recorded.' : ''}</p>
+      {waitLeft > 0 ? (
+        <div className="note" role="status"><b>Read the lesson first.</b> The questions unlock in {Math.floor(waitLeft / 60)}:{String(waitLeft % 60).padStart(2, '0')}.</div>
+      ) : qs.map((q, i) => <Question key={i + q.q} q={q} n={i + 1} onAnswer={p => answer(i, p)} onHelp={() => setHelp(i)} />)}
 
       {saved != null && (
         <div className="card" style={{ borderColor: 'var(--accent)', borderWidth: 2 }}>
@@ -156,7 +193,7 @@ export default function Session({ sessionKey, data, onSaved }) {
       )}
       {saveErr && <div className="card"><p className="err">Couldn't save your score: {saveErr}</p><button className="btn" onClick={() => save(qs)}>Try again</button></div>}
 
-      {saved == null && (
+      {saved == null && waitLeft === 0 && (
         <div className="sticky-score"><span>{ok} correct</span><div className="bar"><i style={{ width: (done / qs.length * 100) + '%' }} /></div><span className="muted">{done} of {qs.length} answered</span></div>
       )}
 

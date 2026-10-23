@@ -75,3 +75,17 @@ test('weekends never break the streak', () => {
   assert.equal(streak(a.slice(0, 2), [], new Date('2026-10-18T15:00:00Z')), 2); // Sunday
   assert.equal(streak(a.slice(0, 2), [], new Date('2026-10-19T08:00:00Z')), 2); // Monday morning, not done yet
 });
+
+test('integrity flags answers given straight after leaving the app', async () => {
+  const { integrity } = await import('../src/lib/stats.js');
+  const q = (away, afterBack) => ({ q: 'x', ok: true, away, afterBack });
+  // The 23 Oct pattern: screenshot, switch to an AI app, come back and answer.
+  const cheat = integrity({ score: 8, total: 8, duration_s: 300, details: [q(25, 4), q(0, null), q(30, 6), q(0, null), q(22, 3), q(0, null), q(0, null), q(0, null)] });
+  assert.equal(cheat.level, 'likely');
+  assert.match(cheat.reasons.join(), /3 answers given straight after coming back/);
+  const honest = integrity({ score: 6, total: 8, duration_s: 420, details: Array(8).fill(q(0, null)) });
+  assert.equal(honest.level, 'ok');
+  const oneBreak = integrity({ score: 7, total: 8, duration_s: 600, details: [q(120, 90), ...Array(7).fill(q(0, null))] });
+  assert.equal(oneBreak.level, 'ok'); // one break, then took his time: listed but not flagged
+  assert.equal(oneBreak.reasons.length, 1);
+});

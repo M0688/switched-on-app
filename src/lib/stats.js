@@ -94,3 +94,26 @@ export function reviewPick(stats) {
   cands.sort((a, b) => a.accuracy - b.accuracy);
   return cands[0]?.session ?? null;
 }
+
+/** Signs a lesson's answers may have come from somewhere else (e.g. a screenshot pasted into an AI app).
+    Uses what the lesson screen records per question: seconds away from the app before answering, and
+    how soon after coming back the answer went in. Older attempts without these fields only get the
+    "rushed" check. Returns { level: 'ok' | 'check' | 'likely', reasons: [...] }. */
+export const RUSHED_SECS = 120;
+export function integrity(attempt) {
+  const d = Array.isArray(attempt.details) ? attempt.details : [];
+  const tracked = d.some(x => 'away' in x);
+  const awayQs = d.filter(x => x.away > 0);
+  const awaySecs = awayQs.reduce((t, x) => t + x.away, 0);
+  // Left the app for 5 s or more, came back, and answered within 20 s.
+  const lookups = d.filter(x => x.away >= 5 && x.afterBack != null && x.afterBack <= 20);
+  const reasons = [];
+  if (lookups.length) reasons.push(`${lookups.length} answer${lookups.length === 1 ? '' : 's'} given straight after coming back to the app`);
+  if (awayQs.length) reasons.push(`left the app ${awayQs.length} time${awayQs.length === 1 ? '' : 's'} during the questions (${awaySecs} s away)`);
+  if (attempt.duration_s != null && attempt.duration_s < RUSHED_SECS) reasons.push('finished in under 2 minutes');
+  const perfect = attempt.total && attempt.score === attempt.total;
+  let level = 'ok';
+  if (lookups.length >= 2 || (lookups.length >= 1 && perfect && awayQs.length >= 2)) level = 'likely';
+  else if (lookups.length || awayQs.length >= 2 || (attempt.duration_s != null && attempt.duration_s < RUSHED_SECS)) level = 'check';
+  return { level, reasons, tracked };
+}

@@ -1,9 +1,12 @@
 import React from 'react';
 import { useCourse } from '../lib/course.js';
 import { findSession, placement, lessonAttempts } from '../content/courses.js';
-import { sessionStats, streak, totals } from '../lib/stats.js';
+import { sessionStats, streak, totals, integrity, dayKey } from '../lib/stats.js';
 import { StreakCard } from './Today.jsx';
 import { pct, when } from '../components/ui.jsx';
+
+const mins = secs => secs < 60 ? `${secs} sec` : `${Math.round(secs / 60)} min`;
+const clock = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
 
 export default function Progress({ profile, data, self }) {
   const course = useCourse();
@@ -61,18 +64,35 @@ export default function Progress({ profile, data, self }) {
 
       <section className="card">
         <h2>Recent sessions</h2>
+        {!self && (() => {
+          const today = attempts.filter(x => dayKey(x.created_at) === dayKey());
+          const flagged = today.filter(x => integrity(x).level !== 'ok');
+          return today.length > 0 && <p className={flagged.length ? 'err small' : 'muted small'}>
+            Today: {flagged.length ? `${flagged.length} of ${today.length} lessons flagged. Open them to see why.` : `${today.length} lesson${today.length === 1 ? '' : 's'}, nothing flagged.`}</p>;
+        })()}
         {!attempts.length && <p className="muted">Nothing yet. Finished lessons show up here.</p>}
         <div className="list">
-          {attempts.slice(0, 15).map(a => {
-            const s = findSession(course, a.session_key); const missed = (a.details || []).filter(d => !d.ok);
+          {attempts.slice(0, 40).map(a => {
+            const s = findSession(course, a.session_key), list = a.details || [];
+            const flag = self ? null : integrity(a);
             return (
               <details key={a.id} className="li" style={{ display: 'block' }}>
                 <summary><span style={{ color: 'var(--ink)' }}>{s?.title ?? a.session_key}</span> <span className="num">{a.score}/{a.total}</span>
-                  <span className="muted small" style={{ fontWeight: 400 }}> · {when(a.created_at)}{a.duration_s ? ` · ${Math.max(1, Math.round(a.duration_s / 60))} min` : ''}</span></summary>
+                  <span className="muted small" style={{ fontWeight: 400 }}> · {when(a.created_at)}{a.duration_s ? ` · ${mins(a.duration_s)}` : ''}</span>
+                  {flag?.level === 'likely' && <> <span className="pill bad">Looked up?</span></>}
+                  {flag?.level === 'check' && <> <span className="pill warn">Check</span></>}</summary>
                 <div className="stack small" style={{ marginTop: 8, gap: 6 }}>
-                  {missed.length ? missed.map((d, i) => (
-                    <div key={i} className="corr"><b>{d.q}</b><br /><span className="x">{d.given ?? 'no answer'}</span> · answer <span className="y">{d.answer}</span></div>
-                  )) : <p className="muted">All correct.</p>}
+                  {flag && flag.level !== 'ok' && <p className={flag.level === 'likely' ? 'err' : ''}><b>{flag.level === 'likely' ? 'Likely looked up elsewhere: ' : 'Worth checking: '}</b>{flag.reasons.join('; ')}.</p>}
+                  {!list.length && <p className="muted">No question details saved.</p>}
+                  {list.map((d, i) => (
+                    <div key={i} className="corr" style={{ borderLeftColor: d.ok ? 'var(--good)' : 'var(--bad)' }}>
+                      <b>{i + 1}. {d.q}</b><br />
+                      {d.ok ? <span className="y">✓ {d.given}</span> : <><span className="x">✗ {d.given ?? 'no answer'}</span> · answer <span className="y">{d.answer}</span></>}
+                      {Array.isArray(d.options) && <><br /><span className="muted">Options: {d.options.join(' · ')}</span></>}
+                      {d.away > 0 && <><br /><span className="err">Left the app for {d.away} s{d.afterBack != null ? `, answered ${d.afterBack} s after coming back` : ''}</span></>}
+                      {(d.tries > 1 || d.secs != null) && <span className="muted"> · {[d.tries > 1 && '2nd try', d.secs != null && `answered at ${clock(d.secs)}`].filter(Boolean).join(' · ')}</span>}
+                    </div>
+                  ))}
                 </div>
               </details>
             );
