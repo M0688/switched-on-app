@@ -7,7 +7,7 @@
    - Hidden minimum (he isn't told): 6/8 or better always counts; 4/8 or 5/8 counts only with 3+ minutes spent;
      under 4/8 never counts. Random clicking scores about 2/8, so this catches it without punishing a quick 8/8.
    - The writing task counts as completed when he submits it (it has no score).
-   - Bonus: +14 hours, at most once per week (Mon-Sun), for either
+   - Bonus: +24 hours, at most once per week (Mon-Sun), for either
        a) 8/8 on every planned lesson in a single day (all 3 blocks done), or
        b) 8/8 on every planned lesson of one subject across the whole week.
      The writing task is left out of the score check.
@@ -16,7 +16,7 @@ import { dayKey, addDays } from './stats.js';
 import { replay, scheduledOn, PER_DAY } from './plan.js';
 
 export const LESSON_MIN = 10;
-export const BONUS_MIN = 14 * 60;
+export const BONUS_MIN = 24 * 60;
 export const MIN_SCORE_RATIO = 0.5;
 export const MIN_SECONDS = 180;
 export const NO_TIME_CHECK_RATIO = 0.75; // 6/8 and above
