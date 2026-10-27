@@ -11,7 +11,6 @@ export const COURSES = {
     planSubjects: same(gcse.SUBJECTS), rewards: true, assessment: false, dayWord: 'school day',
     lessonMinutes: 20, extraPractice: 'Extra practice doesn’t earn fishing time.',
     weekendTutor: false,
-    readFirst: 60, // seconds a new lesson's explanation shows before the questions unlock
   },
   repair: {
     id: 'repair', name: 'Circuit board repair', subjects: repair.SUBJECTS, schedule: repair.SCHEDULE, all: repair.ALL,
