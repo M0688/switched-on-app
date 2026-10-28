@@ -89,6 +89,10 @@ export default function Session({ sessionKey, data, onSaved }) {
   const waitLeft = Math.max(0, Math.ceil(lockSecs - (now - started.current) / 1000));
   useEffect(() => { if (waitLeft > 0) { const t = setTimeout(() => setNow(Date.now()), 1000); return () => clearTimeout(t); } }, [waitLeft, now]);
   const [help, setHelp] = useState(null);
+  // One question at a time: the first unanswered one (a restored draft picks up where it left off).
+  const [cur, setCur] = useState(() => { const k = qs.findIndex(q => !q.done); return k < 0 ? 0 : k; });
+  const qTop = useRef(null);
+  function next() { setCur(c => c + 1); setTimeout(() => qTop.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0); }
   const threads = useRef({});
   const [, force] = useState(0);
   const saving = useRef(false);
@@ -155,7 +159,7 @@ export default function Session({ sessionKey, data, onSaved }) {
 
   function again() {
     clearDraft(session.key);
-    setQs(makeSet(session).map(q => ({ ...q }))); setSaved(null); setSavedId(null); threads.current = {}; started.current = Date.now();
+    setQs(makeSet(session).map(q => ({ ...q }))); setCur(0); setSaved(null); setSavedId(null); threads.current = {}; started.current = Date.now();
     window.scrollTo({ top: 0 });
   }
 
@@ -179,7 +183,14 @@ export default function Session({ sessionKey, data, onSaved }) {
       <p className="muted small" style={{ marginTop: -8 }}>Have a go at every question yourself. Once you've answered, you can ask the tutor about it.{course.rewards ? ' Leaving the app during the questions is recorded.' : ''}</p>
       {waitLeft > 0 ? (
         <div className="note" role="status"><b>Read the lesson first.</b> The questions unlock in {Math.floor(waitLeft / 60)}:{String(waitLeft % 60).padStart(2, '0')}.</div>
-      ) : qs.map((q, i) => <Question key={i + q.q} q={q} n={i + 1} onAnswer={p => answer(i, p)} onHelp={() => setHelp(i)} />)}
+      ) : saved != null ? qs.map((q, i) => <Question key={i + q.q} q={q} n={i + 1} onAnswer={p => answer(i, p)} onHelp={() => setHelp(i)} />)
+      : qs[cur] && (
+        <div className="stack" ref={qTop} style={{ scrollMarginTop: 12 }}>
+          <span className="muted small">Question {cur + 1} of {qs.length}</span>
+          <Question key={cur + qs[cur].q} q={qs[cur]} n={cur + 1} onAnswer={p => answer(cur, p)} onHelp={() => setHelp(cur)} />
+          {qs[cur].done && cur < qs.length - 1 && <button className="btn" style={{ alignSelf: 'flex-start' }} onClick={next}>Next question</button>}
+        </div>
+      )}
 
       {saved != null && (
         <div className="card" style={{ borderColor: 'var(--accent)', borderWidth: 2 }}>
