@@ -140,3 +140,48 @@ test('repair and GCSE lessons are all open from the start of a weekday', async (
   assert.equal(dayPlan(g.planSubjects([]), g.schedule, [], [], early).items.every(i => i.canStart), true);
   assert.equal(dayPlan(r.planSubjects([]), r.schedule, [], [], new Date('2026-10-24T10:00:00Z')).items.length, 0); // Saturday
 });
+
+import { BANK as WEEKLY, PER_SUBJECT, buildWeekly, weekKey, weekStart, weeklyOpen, weeklyDone } from '../src/content/repair/weekly.js';
+import { isAssessment } from '../src/content/repair/assessment.js';
+
+test('weekly check: every subject covered, no give-away answers, distinct options', () => {
+  assert.deepEqual(Object.keys(WEEKLY).sort(), Object.keys(repair.subjects).sort());
+  let longest = 0, total = 0;
+  for (const rows of Object.values(WEEKLY)) {
+    assert.ok(rows.length >= PER_SUBJECT * 3);
+    for (const [topic, q, right, ...wrong] of rows) {
+      total++;
+      assert.ok(topic && q && wrong.length === 3, q);
+      assert.equal(new Set([right, ...wrong]).size, 4, q);
+      assert.ok(!/\d+\s*[×÷]\s*\d+/.test(q), 'no sums: ' + q);
+      const w = Math.max(...wrong.map(x => x.length));
+      assert.ok(!(right.length >= 1.3 * w && right.length - w > 4), 'give-away: ' + q);
+      if (right.length > w) longest++;
+    }
+  }
+  assert.ok(longest / total <= 0.25, `right answer is the longest too often (${longest}/${total})`);
+});
+
+test('weekly check: opens Friday to Sunday, one per week, misses come back first', () => {
+  assert.equal(weekStart(new Date('2026-10-30T12:00:00Z')), '2026-10-26');
+  assert.equal(weekStart(new Date('2026-11-01T20:00:00Z')), '2026-10-26');
+  assert.equal(weekStart(new Date('2026-11-02T08:00:00Z')), '2026-11-02');
+  assert.equal(weeklyOpen(new Date('2026-10-29T12:00:00Z')), false);
+  assert.equal(weeklyOpen(new Date('2026-10-30T12:00:00Z')), true);
+  assert.equal(weeklyOpen(new Date('2026-11-01T12:00:00Z')), true);
+  const fri = new Date('2026-10-30T12:00:00Z');
+  const row = { session_key: weekKey(fri), subject: 'weekly', score: 1, total: 18, created_at: '2026-10-30T12:00:00Z',
+    details: [{ q: WEEKLY.components[0][1], ok: false }, { q: WEEKLY.components[1][1], ok: true }] };
+  assert.ok(weeklyDone([row], fri));
+  assert.ok(!weeklyDone([row], new Date('2026-11-06T12:00:00Z')));
+  assert.ok(isAssessment(row), 'weekly checks must not count as lessons');
+  assert.deepEqual(placement([row]), {});
+  for (let n = 0; n < 50; n++) {
+    const set = buildWeekly([row]);
+    assert.equal(set.length, Object.keys(WEEKLY).length * PER_SUBJECT);
+    const comp = set.filter(x => x.subject === 'components').map(x => x.q);
+    assert.ok(comp.includes(WEEKLY.components[0][1]), 'missed question returns');
+    assert.ok(!comp.includes(WEEKLY.components[1][1]), 'right answer waits behind unseen ones');
+    for (const x of set) { assert.equal(x.o.length, 5); assert.ok(x.a >= 0 && x.a < 4); }
+  }
+});

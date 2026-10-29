@@ -10,6 +10,7 @@ import Help from './Help.jsx';
 import { isWeekend } from '../lib/stats.js';
 import { FishingPage } from '../components/Fishing.jsx';
 import Assessment from './Assessment.jsx';
+import WeeklyCheck from './WeeklyCheck.jsx';
 import Settings from './Settings.jsx';
 import { useCourse } from '../lib/course.js';
 
@@ -25,7 +26,7 @@ export default function StudentApp({ profile, banner = null }) {
   const tab = ['practice', 's', 'writing'].includes(top) ? 'practice' : top === 'progress' ? 'progress' : top === 'help' ? 'help' : top === 'settings' ? 'settings' : 'today';
 
   const weekend = isWeekend();
-  // GCSE: everything closes at weekends. Repair: only lessons do; the tutor and placement check stay open.
+  // GCSE: everything closes at weekends. Repair: only lessons do; the tutor, placement and weekly checks stay open.
   const closed = course.weekendTutor ? ['s', 'practice'] : ['s', 'writing', 'practice', 'help'];
   let body;
   if (weekend && closed.includes(top)) body = (
@@ -40,6 +41,7 @@ export default function StudentApp({ profile, banner = null }) {
   else if (top === 'help') body = <Help />;
   else if (top === 'settings') body = <Settings profile={profile} />;
   else if (top === 'assess' && course.assessment) body = <Assessment onSaved={reload} />;
+  else if (top === 'weekly' && course.assessment) body = <WeeklyCheck data={data} onSaved={reload} />;
   else if (top === 'fishing' && course.rewards) body = <FishingPage data={data} />;
   else body = <Today profile={profile} data={data} />;
 

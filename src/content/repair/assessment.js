@@ -1,6 +1,8 @@
 /* Placement assessment for the repair course: 6 questions per track, 2 at each level.
    The score per track sets where that track starts (see startLevel). */
 
+import { WEEK_PREFIX } from './weekly.js';
+
 export const NOT_SURE = 'Not sure';
 
 // [level, question, right, wrong1, wrong2, wrong3]
@@ -49,7 +51,9 @@ export const QUESTIONS = {
 
 export const KEY_PREFIX = 'ax-';
 export const assessKey = track => KEY_PREFIX + track;
-export const isAssessment = a => typeof a?.session_key === 'string' && a.session_key.startsWith(KEY_PREFIX);
+const isPlacement = a => typeof a?.session_key === 'string' && a.session_key.startsWith(KEY_PREFIX);
+/** Placement checks and weekly checks: neither counts as a lesson. */
+export const isAssessment = a => isPlacement(a) || (typeof a?.session_key === 'string' && a.session_key.startsWith(WEEK_PREFIX));
 
 /** Score out of 6 → the level that track starts at. */
 export const levelFor = score => score >= 5 ? 3 : score >= 3 ? 2 : 1;
@@ -58,7 +62,7 @@ export const levelFor = score => score >= 5 ? 3 : score >= 3 ? 2 : 1;
 export function placement(attempts) {
   const out = {};
   for (const a of attempts) {
-    if (!isAssessment(a)) continue;
+    if (!isPlacement(a)) continue;
     const track = a.session_key.slice(KEY_PREFIX.length);
     if (!out[track] || a.created_at > out[track].at) out[track] = { score: a.score, level: levelFor(a.score), at: a.created_at };
   }

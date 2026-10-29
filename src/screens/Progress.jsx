@@ -4,6 +4,7 @@ import { findSession, placement, lessonAttempts } from '../content/courses.js';
 import { sessionStats, streak, totals, integrity, dayKey } from '../lib/stats.js';
 import { StreakCard } from './Today.jsx';
 import { pct, when } from '../components/ui.jsx';
+import { weeklyChecks, weeklyOpen, weeklyDone } from '../content/repair/weekly.js';
 
 const mins = secs => secs < 60 ? `${secs} sec` : `${Math.round(secs / 60)} min`;
 const clock = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
@@ -45,6 +46,24 @@ export default function Progress({ profile, data, self }) {
           ))}
         </div>
       )}
+
+      {course.assessment && (() => {
+        const checks = weeklyChecks(data.attempts).slice(0, 4);
+        const due = self && weeklyOpen() && !weeklyDone(data.attempts);
+        if (!checks.length && !due) return null;
+        const missed = (checks[0]?.details ?? []).filter(d => !d.ok).map(d => d.topic).filter(Boolean);
+        return (
+          <div className="card">
+            <div className="row"><span className="eyebrow">Weekly checks</span><span className="spacer" />
+              {due && <a href="#/weekly" className="small">Take this week’s</a>}</div>
+            {checks.map(c => (
+              <div key={c.session_key} className="row"><b>w/c {new Date(c.session_key.slice(3) + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</b><span className="spacer" />
+                <span className="muted small num">{c.score}/{c.total}</span></div>
+            ))}
+            {missed.length > 0 && <p className="muted small">Latest gaps: {missed.join(', ')}</p>}
+          </div>
+        );
+      })()}
 
       {Object.entries(SUBJECTS).map(([id, subj]) => (
         <section key={id} className="card">
