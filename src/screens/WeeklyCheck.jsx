@@ -19,7 +19,7 @@ export default function WeeklyCheck({ data, onSaved }) {
   if (!result && (!weeklyOpen() || weeklyDone(data.attempts))) return (
     <main className="page"><div className="card">
       <h1>Weekly check</h1>
-      <p className="muted">{weeklyOpen() ? 'You’ve done this week’s check. The next one opens on Friday.' : 'The weekly check opens on Friday and stays open over the weekend.'}</p>
+      <p className="muted">{weeklyOpen() ? 'You’ve done this week’s check. The next one opens next Thursday.' : 'The weekly check opens on Thursdays.'}</p>
       <a className="btn" href="#/today">OK</a>
     </div></main>
   );

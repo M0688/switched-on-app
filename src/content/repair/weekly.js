@@ -1,5 +1,5 @@
-/* Weekly check for the repair course: a broad, no-maths quiz that opens at the end of each week
-   (Friday to Sunday). 3 questions per subject; questions he missed last time come back first,
+/* Weekly check for the repair course: a broad, no-maths quiz that opens on Thursdays,
+   so the Friday lesson writer can use the results. 3 questions per subject; questions he missed last time come back first,
    then ones he hasn't seen, then the ones he got right longest ago.
    The weekly lesson writer reads the misses and writes lessons on those gaps. */
 import { shuffle } from '../kit.js';
@@ -104,8 +104,8 @@ export function weekStart(now = new Date()) {
   return addDays(dayKey(now), -((wd + 6) % 7));
 }
 export const weekKey = (now = new Date()) => WEEK_PREFIX + weekStart(now);
-/** Opens Friday and stays open over the weekend. */
-export const weeklyOpen = (now = new Date()) => [5, 6, 0].includes(londonWeekday(now));
+/** Open on Thursdays only (the lesson writer runs Friday morning). */
+export const weeklyOpen = (now = new Date()) => londonWeekday(now) === 4;
 export const isWeekly = a => typeof a?.session_key === 'string' && a.session_key.startsWith(WEEK_PREFIX);
 export const weeklyDone = (attempts, now = new Date()) => attempts.some(a => a.session_key === weekKey(now));
 export const weeklyChecks = attempts => attempts.filter(isWeekly).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));

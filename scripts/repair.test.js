@@ -162,18 +162,18 @@ test('weekly check: every subject covered, no give-away answers, distinct option
   assert.ok(longest / total <= 0.25, `right answer is the longest too often (${longest}/${total})`);
 });
 
-test('weekly check: opens Friday to Sunday, one per week, misses come back first', () => {
+test('weekly check: opens Thursday only, one per week, misses come back first', () => {
   assert.equal(weekStart(new Date('2026-10-30T12:00:00Z')), '2026-10-26');
   assert.equal(weekStart(new Date('2026-11-01T20:00:00Z')), '2026-10-26');
   assert.equal(weekStart(new Date('2026-11-02T08:00:00Z')), '2026-11-02');
-  assert.equal(weeklyOpen(new Date('2026-10-29T12:00:00Z')), false);
-  assert.equal(weeklyOpen(new Date('2026-10-30T12:00:00Z')), true);
-  assert.equal(weeklyOpen(new Date('2026-11-01T12:00:00Z')), true);
-  const fri = new Date('2026-10-30T12:00:00Z');
-  const row = { session_key: weekKey(fri), subject: 'weekly', score: 1, total: 18, created_at: '2026-10-30T12:00:00Z',
+  assert.equal(weeklyOpen(new Date('2026-10-28T12:00:00Z')), false);
+  assert.equal(weeklyOpen(new Date('2026-10-29T12:00:00Z')), true);
+  assert.equal(weeklyOpen(new Date('2026-10-30T12:00:00Z')), false);
+  const fri = new Date('2026-10-29T12:00:00Z');
+  const row = { session_key: weekKey(fri), subject: 'weekly', score: 1, total: 18, created_at: '2026-10-29T12:00:00Z',
     details: [{ q: WEEKLY.components[0][1], ok: false }, { q: WEEKLY.components[1][1], ok: true }] };
   assert.ok(weeklyDone([row], fri));
-  assert.ok(!weeklyDone([row], new Date('2026-11-06T12:00:00Z')));
+  assert.ok(!weeklyDone([row], new Date('2026-11-05T12:00:00Z')));
   assert.ok(isAssessment(row), 'weekly checks must not count as lessons');
   assert.deepEqual(placement([row]), {});
   for (let n = 0; n < 50; n++) {
