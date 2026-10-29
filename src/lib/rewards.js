@@ -8,7 +8,7 @@
      under 4/8 never counts. Random clicking scores about 2/8, so this catches it without punishing a quick 8/8.
    - The writing task counts as completed when he submits it (it has no score).
    - Bonus (agreed 29 Oct 2026): +24 hours, once per week, for completing every planned lesson that week
-     (Mon-Fri, all 3 blocks, every subject) while his running average is 75% or more. The running average
+     (Mon-Fri, all 3 blocks, every subject) while his running average is 85% or more (raised from 75% on 29 Oct 2026). The running average
      is worked out across every planned lesson he has ever done, up to the end of that week, all subjects.
      The writing task counts as completed but is left out of the average.
    - Until then the bonus was 8/8 on every lesson in a day, or on one subject all week. Weeks up to and
@@ -22,7 +22,7 @@ export const BONUS_MIN = 24 * 60;
 export const MIN_SCORE_RATIO = 0.5;
 export const MIN_SECONDS = 180;
 export const NO_TIME_CHECK_RATIO = 0.75; // 6/8 and above
-export const WEEK_AVG = 0.75;
+export const WEEK_AVG = 0.85;
 const NEW_RULE_FROM = '2026-10-26'; // weeks from this Monday: the full-week bonus
 const OLD_RULE_UNTIL = '2026-10-26'; // weeks up to this Monday: the old perfect-score bonus as well
 

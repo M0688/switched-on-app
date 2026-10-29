@@ -37,7 +37,7 @@ export function FishingCard({ data, link }) {
         <div className="row small"><span>This week: <b>{hours(wk.baseMin)}</b> of {hours(r.weekMax)}</span><span className="spacer" />{wk.bonusMin > 0 && <b>+{hours(wk.bonusMin)} bonus</b>}</div>
         <div className="bar"><i style={{ width: Math.min(100, wk.baseMin / (r.weekMax || 1) * 100) + '%', background: 'var(--amber)' }} /></div>
       </div>
-      <p className="muted small">{wk.bonus ? `Bonus: ${wk.bonus.label}.` : `Finish all ${wk.progress.planned} of this week’s lessons and keep your average at 75% or more for a 24-hour session. So far: ${wk.progress.done} done${wk.progress.avg != null ? `, average ${Math.round(wk.progress.avg * 100)}%` : ''}.`}</p>
+      <p className="muted small">{wk.bonus ? `Bonus: ${wk.bonus.label}.` : `Finish all ${wk.progress.planned} of this week’s lessons and keep your average at 85% or more for a 24-hour session. So far: ${wk.progress.done} done${wk.progress.avg != null ? `, average ${Math.round(wk.progress.avg * 100)}%` : ''}.`}</p>
     </>
   );
   return link ? <a href={link} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>{body}</a> : <div className="card">{body}</div>;
@@ -77,7 +77,7 @@ export function FishingPage({ data }) {
         <ul style={{ margin: '6px 0 0', paddingLeft: '1.2em' }}>
           <li>10 minutes for each of the day's lessons you complete properly: up to 2 hours a day.</li>
           <li>Only the lessons on your Today screen count, so take your time with each one.</li>
-          <li>Finish every lesson in the week (all subjects, all 3 blocks, Monday to Friday) while keeping your overall average score at 75% or more to earn a 24-hour fishing session. Your average counts every lesson you’ve done, so every score matters.</li>
+          <li>Finish every lesson in the week (all subjects, all 3 blocks, Monday to Friday) while keeping your overall average score at 85% or more to earn a 24-hour fishing session. Your average counts every lesson you’ve done, so every score matters.</li>
           <li>Your time never runs out and is never taken away.</li>
         </ul>
       </div>
