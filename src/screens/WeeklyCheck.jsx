@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCourse } from '../lib/course.js';
-import { buildWeekly, weekKey, weeklyOpen, weeklyDone, weekStart } from '../content/repair/weekly.js';
+import { buildWeekly, weekKey, weeklyOpen, weeklyDone, weekStart } from '../content/weekly.js';
 import { saveAttempts } from '../lib/api.js';
 import { loadDraft, saveDraft, clearDraft } from '../lib/draft.js';
 
@@ -9,7 +9,7 @@ export default function WeeklyCheck({ data, onSaved }) {
   const course = useCourse();
   const key = weekKey();
   const [draft] = useState(() => loadDraft(key));
-  const [qs, setQs] = useState(() => draft?.qs ?? buildWeekly(data.attempts));
+  const [qs, setQs] = useState(() => draft?.qs ?? buildWeekly(data.attempts, course.id));
   const [i, setI] = useState(() => draft?.i ?? 0);
   const [result, setResult] = useState(null);
   const [err, setErr] = useState('');

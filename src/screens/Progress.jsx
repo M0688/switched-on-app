@@ -4,7 +4,7 @@ import { findSession, placement, lessonAttempts } from '../content/courses.js';
 import { sessionStats, streak, totals, integrity, dayKey } from '../lib/stats.js';
 import { StreakCard } from './Today.jsx';
 import { pct, when } from '../components/ui.jsx';
-import { weeklyChecks, weeklyOpen, weeklyDone } from '../content/repair/weekly.js';
+import { weeklyChecks, weeklyOpen, weeklyDone } from '../content/weekly.js';
 
 const mins = secs => secs < 60 ? `${secs} sec` : `${Math.round(secs / 60)} min`;
 const clock = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
@@ -12,7 +12,7 @@ const clock = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, 
 export default function Progress({ profile, data, self }) {
   const course = useCourse();
   const { writings } = data;
-  const attempts = course.assessment ? lessonAttempts(data.attempts) : data.attempts;
+  const attempts = lessonAttempts(data.attempts);
   const ALL = course.all, SUBJECTS = course.subjects;
   const place = course.assessment ? placement(data.attempts) : {};
   const st = sessionStats(ALL, attempts, writings);
@@ -47,7 +47,7 @@ export default function Progress({ profile, data, self }) {
         </div>
       )}
 
-      {course.assessment && (() => {
+      {course.weekly && (() => {
         const checks = weeklyChecks(data.attempts).slice(0, 4);
         const due = self && weeklyOpen() && !weeklyDone(data.attempts);
         if (!checks.length && !due) return null;

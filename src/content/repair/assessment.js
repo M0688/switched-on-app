@@ -1,7 +1,7 @@
 /* Placement assessment for the repair course: 6 questions per track, 2 at each level.
    The score per track sets where that track starts (see startLevel). */
 
-import { WEEK_PREFIX } from './weekly.js';
+import { WEEK_PREFIX } from '../weekly.js';
 
 export const NOT_SURE = 'Not sure';
 

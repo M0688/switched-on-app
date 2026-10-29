@@ -41,7 +41,7 @@ export default function StudentApp({ profile, banner = null }) {
   else if (top === 'help') body = <Help />;
   else if (top === 'settings') body = <Settings profile={profile} />;
   else if (top === 'assess' && course.assessment) body = <Assessment onSaved={reload} />;
-  else if (top === 'weekly' && course.assessment) body = <WeeklyCheck data={data} onSaved={reload} />;
+  else if (top === 'weekly' && course.weekly) body = <WeeklyCheck data={data} onSaved={reload} />;
   else if (top === 'fishing' && course.rewards) body = <FishingPage data={data} />;
   else body = <Today profile={profile} data={data} />;
 

@@ -141,19 +141,20 @@ test('repair and GCSE lessons are all open from the start of a weekday', async (
   assert.equal(dayPlan(r.planSubjects([]), r.schedule, [], [], new Date('2026-10-24T10:00:00Z')).items.length, 0); // Saturday
 });
 
-import { BANK as WEEKLY, PER_SUBJECT, buildWeekly, weekKey, weekStart, weeklyOpen, weeklyDone } from '../src/content/repair/weekly.js';
+import { BANKS, PER_SUBJECT, buildWeekly, weekKey, weekStart, weeklyOpen, weeklyDone } from '../src/content/weekly.js';
+const WEEKLY = BANKS.repair;
 import { isAssessment } from '../src/content/repair/assessment.js';
 
-test('weekly check: every subject covered, no give-away answers, distinct options', () => {
-  assert.deepEqual(Object.keys(WEEKLY).sort(), Object.keys(repair.subjects).sort());
+for (const [cid, bank] of Object.entries(BANKS)) test(`weekly check (${cid}): every subject covered, no give-away answers, distinct options`, () => {
+  assert.deepEqual(Object.keys(bank).sort(), Object.keys((cid === 'gcse' ? gcse : repair).subjects).sort());
   let longest = 0, total = 0;
-  for (const rows of Object.values(WEEKLY)) {
+  for (const rows of Object.values(bank)) {
     assert.ok(rows.length >= PER_SUBJECT * 3);
     for (const [topic, q, right, ...wrong] of rows) {
       total++;
       assert.ok(topic && q && wrong.length === 3, q);
       assert.equal(new Set([right, ...wrong]).size, 4, q);
-      assert.ok(!/\d+\s*[×÷]\s*\d+/.test(q), 'no sums: ' + q);
+      if (cid === 'repair') assert.ok(!/\d+\s*[×÷]\s*\d+/.test(q), 'no sums: ' + q);
       const w = Math.max(...wrong.map(x => x.length));
       assert.ok(!(right.length >= 1.3 * w && right.length - w > 4), 'give-away: ' + q);
       if (right.length > w) longest++;
@@ -184,4 +185,11 @@ test('weekly check: opens Thursday only, one per week, misses come back first', 
     assert.ok(!comp.includes(WEEKLY.components[1][1]), 'right answer waits behind unseen ones');
     for (const x of set) { assert.equal(x.o.length, 5); assert.ok(x.a >= 0 && x.a < 4); }
   }
+});
+
+test('weekly check (gcse): builds 3 per subject and never counts as a lesson', () => {
+  const set = buildWeekly([], 'gcse');
+  assert.equal(set.length, Object.keys(gcse.subjects).length * PER_SUBJECT);
+  for (const x of set) { assert.ok(gcse.subjects[x.subject]); assert.ok(x.a >= 0 && x.a < 4); }
+  assert.deepEqual(lessonAttempts([{ session_key: 'wk-2026-10-26', subject: 'weekly' }]), []);
 });

@@ -8,13 +8,13 @@ const same = subjects => () => subjects;
 export const COURSES = {
   gcse: {
     id: 'gcse', name: 'GCSE', subjects: gcse.SUBJECTS, schedule: gcse.SCHEDULE, all: gcse.ALL,
-    planSubjects: same(gcse.SUBJECTS), rewards: true, assessment: false, dayWord: 'school day',
+    planSubjects: same(gcse.SUBJECTS), rewards: true, assessment: false, weekly: true, dayWord: 'school day',
     lessonMinutes: 20, extraPractice: 'Extra practice doesn’t earn fishing time.',
     weekendTutor: false,
   },
   repair: {
     id: 'repair', name: 'Circuit board repair', subjects: repair.SUBJECTS, schedule: repair.SCHEDULE, all: repair.ALL,
-    planSubjects: repair.planSubjects, rewards: false, assessment: true, dayWord: 'weekday',
+    planSubjects: repair.planSubjects, rewards: false, assessment: true, weekly: true, weeklyNote: 'No maths. ', dayWord: 'weekday',
     lessonMinutes: 15, extraPractice: 'Lessons below your placement level are open here too.',
     weekendTutor: true, levels: repair.LEVELS,
   },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCourse } from '../lib/course.js';
 import { placement } from '../content/courses.js';
-import { weeklyOpen, weeklyDone, BANK, PER_SUBJECT } from '../content/repair/weekly.js';
+import { weeklyOpen, weeklyDone, weeklySize } from '../content/weekly.js';
 import { streak, activity, dayKey } from '../lib/stats.js';
 import { dayPlan, BLOCK_HOURS, PER_DAY, blockLabel } from '../lib/plan.js';
 import { Logo } from '../components/ui.jsx';
@@ -50,7 +50,7 @@ export default function Today({ profile, data }) {
   const plan = dayPlan(course.planSubjects(attempts), course.schedule, attempts, writings);
   const needsPlacement = course.assessment && Object.keys(placement(attempts)).length === 0;
   const weekend = plan.weekend;
-  const weeklyDue = course.assessment && !needsPlacement && weeklyOpen() && !weeklyDone(attempts);
+  const weeklyDue = course.weekly && !needsPlacement && weeklyOpen() && !weeklyDone(attempts);
   const allDone = !weekend && plan.items.length > 0 && plan.items.every(i => i.finished);
   const waiting = !weekend && !allDone && plan.items.every(i => !i.canStart);
   const latest = writings.find(w => w.status === 'marked');
@@ -82,7 +82,7 @@ export default function Today({ profile, data }) {
       {weeklyDue && (
         <a href="#/weekly" className="card" style={{ borderColor: 'var(--accent)', borderWidth: 2, textDecoration: 'none', color: 'inherit' }}>
           <span className="eyebrow">End of the week</span><b>Weekly check</b>
-          <span className="muted">{Object.keys(BANK).length * PER_SUBJECT} questions across every subject, about 5 minutes. No maths. What you miss shapes your next lessons.</span>
+          <span className="muted">{weeklySize(course.id)} questions across every subject, about 5 minutes. {course.weeklyNote ?? ''}What you miss shapes your next lessons.</span>
           <span className="btn" style={{ alignSelf: 'flex-start' }}>Start</span>
         </a>
       )}

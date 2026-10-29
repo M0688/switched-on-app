@@ -1,14 +1,5 @@
-/* Weekly check for the repair course: a broad, no-maths quiz that opens on Thursdays,
-   so the Friday lesson writer can use the results. 3 questions per subject; questions he missed last time come back first,
-   then ones he hasn't seen, then the ones he got right longest ago.
-   The weekly lesson writer reads the misses and writes lessons on those gaps. */
-import { shuffle } from '../kit.js';
-import { dayKey, addDays, londonWeekday } from '../../lib/stats.js';
-
-export const WEEK_PREFIX = 'wk-';
-export const PER_SUBJECT = 3;
-
-// subject: [ [topic, question, right, wrong1, wrong2, wrong3], ... ]
+/* Weekly check questions for the repair course (see ../weekly.js). No maths.
+   subject: [ [topic, question, right, wrong1, wrong2, wrong3], ... ] */
 export const BANK = {
   components: [
     ['Pull-up resistors', 'A pull-up resistor connects an input pin to:', 'The supply rail, so it reads high', 'Ground, so it reads low until pressed', 'Another input, so the two share a level', 'Nothing, so the pin is free to float'],
@@ -95,31 +86,3 @@ export const BANK = {
     ['Disc drives', 'A console works but won’t read discs. The fault is most likely in:', 'The drive’s laser or mechanism', 'The HDMI port or retimer', 'The power supply’s 12 V output', 'The controller’s USB port'],
   ],
 };
-
-export const NOT_SURE = 'Not sure';
-
-/** Monday (London date) of the week containing `now`. Each week has one check, keyed by it. */
-export function weekStart(now = new Date()) {
-  const wd = londonWeekday(now);
-  return addDays(dayKey(now), -((wd + 6) % 7));
-}
-export const weekKey = (now = new Date()) => WEEK_PREFIX + weekStart(now);
-/** Open on Thursdays only (the lesson writer runs Friday morning). */
-export const weeklyOpen = (now = new Date()) => londonWeekday(now) === 4;
-export const isWeekly = a => typeof a?.session_key === 'string' && a.session_key.startsWith(WEEK_PREFIX);
-export const weeklyDone = (attempts, now = new Date()) => attempts.some(a => a.session_key === weekKey(now));
-export const weeklyChecks = attempts => attempts.filter(isWeekly).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-
-/** Builds this week's check: per subject, last-time misses first, then unseen, then right longest ago. */
-export function buildWeekly(attempts) {
-  const last = {}; // question text → { ok, at }
-  for (const a of weeklyChecks(attempts).reverse()) for (const d of Array.isArray(a.details) ? a.details : []) last[d.q] = { ok: d.ok, at: a.created_at };
-  const rank = q => !last[q] ? 1 : last[q].ok ? 2 : 0;
-  return Object.entries(BANK).flatMap(([subject, rows]) => {
-    const order = shuffle(rows).sort((x, y) => rank(x[1]) - rank(y[1]) || (rank(x[1]) === 2 ? (last[x[1]].at < last[y[1]].at ? -1 : 1) : 0));
-    return order.slice(0, PER_SUBJECT).map(([topic, q, right, ...wrong]) => {
-      const o = [...shuffle([right, ...wrong]), NOT_SURE];
-      return { subject, topic, q, o, a: o.indexOf(right), chosen: null };
-    });
-  });
-}
