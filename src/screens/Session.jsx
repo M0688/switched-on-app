@@ -234,6 +234,7 @@ function FishingNote({ data, attemptId }) {
         <span style={{ fontWeight: strong ? 700 : 400 }}>{text}</span>
         {r.perfectDayToday && r.thisWeek.bonus?.reason === 'perfect-day' && <b>100% on every lesson today: 24-hour fishing session earned!</b>}
         {r.thisWeek.bonus?.reason === 'perfect-subject' && <b>{r.thisWeek.bonus.label}: 24-hour fishing session earned!</b>}
+        {r.thisWeek.bonus?.reason === 'full-week' && <b>Every lesson this week done, average {Math.round(r.thisWeek.progress.avg * 100)}%: 24-hour fishing session earned!</b>}
         <a href="#/fishing" className="small">Bank: {Math.floor(r.availableMin / 60)}h {r.availableMin % 60}m</a>
       </div>
     </div>

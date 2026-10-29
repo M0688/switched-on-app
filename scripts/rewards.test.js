@@ -110,3 +110,47 @@ test('writing task fills an English slot when submitted', () => {
   const row = r.thisWeek.days['2026-10-12'].find(x => x.subject === 'english');
   assert.ok(row.writing && row.counted);
 });
+
+// Weekly bonus (from the week of 26 Oct 2026): every planned lesson Mon-Fri, running average 75% or better.
+function fullWeek(monday, scoreFor, skip = () => false, start = { attempts: [], writings: [] }) {
+  const attempts = [...start.attempts], writings = [...start.writings];
+  for (let d = 0; d < 5; d++) {
+    const day = new Date(Date.parse(monday + 'T09:00:00Z') + d * 864e5);
+    for (let k = 0; k < 3; k++) {
+      const at = new Date(day.getTime() + k * 3600e3 + 60e3).toISOString();
+      for (const it of plan(attempts, at, writings).items) {
+        if (!it.canStart || it.finished || skip(d, k, it.subject)) continue;
+        if (it.next.writing) writings.push({ id: 'w' + (++n), status: 'marked', created_at: at });
+        else attempts.push({ id: 'a' + (++n), session_key: it.next.key, subject: it.subject, score: scoreFor(d, k, it.subject), total: 8, duration_s: 600, created_at: at });
+      }
+    }
+  }
+  return { attempts, writings };
+}
+const runW = ({ attempts, writings }, now) => computeRewards({ subjects: SUBJECTS, schedule: SCHEDULE, attempts, writings, now: new Date(now) });
+
+test('weekly bonus: every lesson done with a 75% running average earns 24 hours', () => {
+  const r = runW(fullWeek('2026-11-02', () => 6), '2026-11-06T20:00:00Z').thisWeek;
+  assert.equal(r.progress.done, r.progress.planned);
+  assert.equal(r.bonus?.reason, 'full-week');
+  assert.equal(r.bonusMin, BONUS_MIN);
+});
+
+test('weekly bonus: not under 75%, not with a lesson missed, not before Friday', () => {
+  assert.equal(runW(fullWeek('2026-11-02', (d, k) => (k === 0 ? 5 : 6)), '2026-11-06T20:00:00Z').thisWeek.bonus, null);
+  assert.equal(runW(fullWeek('2026-11-02', () => 8, (d, k, s) => d === 2 && k === 1 && s === 'maths'), '2026-11-06T20:00:00Z').thisWeek.bonus, null);
+  assert.equal(runW(fullWeek('2026-11-02', () => 8, d => d === 4), '2026-11-05T20:00:00Z').thisWeek.bonus, null);
+  assert.equal(runW(fullWeek('2026-11-02', () => 8, d => d > 0), '2026-11-02T20:00:00Z').thisWeek.bonus, null); // a perfect day no longer counts
+});
+
+test('weekly bonus: the average runs across weeks', () => {
+  const weak = fullWeek('2026-11-02', () => 4);        // 50% week
+  const good = fullWeek('2026-11-09', () => 8, () => false, weak); // 100% week: running average 75%
+  const r = runW(good, '2026-11-13T20:00:00Z');
+  assert.equal(r.weeks.find(w => w.weekStart === '2026-11-02').bonus, null);
+  assert.equal(r.thisWeek.progress.weekAvg, 1);
+  assert.ok(r.thisWeek.progress.avg >= 0.75 && r.thisWeek.progress.avg < 0.76);
+  assert.equal(r.thisWeek.bonus?.reason, 'full-week');
+  const short = fullWeek('2026-11-09', () => 7, () => false, weak); // running average 68.75%
+  assert.equal(runW(short, '2026-11-13T20:00:00Z').thisWeek.bonus, null);
+});

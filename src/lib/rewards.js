@@ -7,10 +7,12 @@
    - Hidden minimum (he isn't told): 6/8 or better always counts; 4/8 or 5/8 counts only with 3+ minutes spent;
      under 4/8 never counts. Random clicking scores about 2/8, so this catches it without punishing a quick 8/8.
    - The writing task counts as completed when he submits it (it has no score).
-   - Bonus: +24 hours, at most once per week (Mon-Sun), for either
-       a) 8/8 on every planned lesson in a single day (all 3 blocks done), or
-       b) 8/8 on every planned lesson of one subject across the whole week.
-     The writing task is left out of the score check.
+   - Bonus (agreed 29 Oct 2026): +24 hours, once per week, for completing every planned lesson that week
+     (Mon-Fri, all 3 blocks, every subject) while his running average is 75% or more. The running average
+     is worked out across every planned lesson he has ever done, up to the end of that week, all subjects.
+     The writing task counts as completed but is left out of the average.
+   - Until then the bonus was 8/8 on every lesson in a day, or on one subject all week. Weeks up to and
+     including 26 Oct 2026 can still earn it that way, so nothing already earned is taken away.
    - Hours never expire and are never taken away. */
 import { dayKey, addDays } from './stats.js';
 import { replay, scheduledOn, PER_DAY } from './plan.js';
@@ -20,6 +22,9 @@ export const BONUS_MIN = 24 * 60;
 export const MIN_SCORE_RATIO = 0.5;
 export const MIN_SECONDS = 180;
 export const NO_TIME_CHECK_RATIO = 0.75; // 6/8 and above
+export const WEEK_AVG = 0.75;
+const NEW_RULE_FROM = '2026-10-26'; // weeks from this Monday: the full-week bonus
+const OLD_RULE_UNTIL = '2026-10-26'; // weeks up to this Monday: the old perfect-score bonus as well
 
 const weekdayOfKey = k => new Date(k + 'T12:00:00Z').getUTCDay();
 export const weekStart = k => addDays(k, -((weekdayOfKey(k) + 6) % 7)); // Monday
@@ -54,31 +59,46 @@ export function computeRewards({ subjects, schedule, attempts, writings, log = [
   const subjectsOn = d => Object.keys(subjects).filter(id => scheduledOn(subjects, schedule, id, noon(d)));
   const fullAndPerfect = (rows) => rows.length >= PER_DAY && rows.filter(r => !r.writing).every(r => r.perfect);
 
-  for (const week of Object.values(byWeek)) {
-    week.baseMin = week.lessons.reduce((t, l) => t + l.minutes, 0);
-    week.bonus = null;
+  // The old bonus (weeks up to 26 Oct 2026): a perfect day, or a perfect subject week.
+  function oldBonus(week) {
     // a) A perfect day: every subject's 3 lessons done, all 8/8.
     for (const d of Object.keys(week.days).sort()) {
       const subs = subjectsOn(d);
       const rows = week.days[d];
       const scored = rows.filter(r => !r.writing);
       if (subs.length && scored.length && subs.every(id => fullAndPerfect(rows.filter(r => r.subject === id)))) {
-        week.bonus = { reason: 'perfect-day', day: d, label: `100% on every lesson on ${noon(d).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' })}` };
-        break;
+        return { reason: 'perfect-day', day: d, label: `100% on every lesson on ${noon(d).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' })}` };
       }
     }
     // b) A perfect subject week: every scheduled day that week, all 3 lessons done, all 8/8.
-    if (!week.bonus) {
+    {
       for (const id of Object.keys(subjects)) {
         const days = [0, 1, 2, 3, 4].map(i => addDays(week.weekStart, i)).filter(d => subjectsOn(d).includes(id));
         if (!days.length || days.some(d => d > today)) continue;
         const rows = days.map(d => (week.days[d] ?? []).filter(r => r.subject === id));
         if (rows.every(fullAndPerfect) && rows.flat().some(r => !r.writing)) {
-          week.bonus = { reason: 'perfect-subject', subject: id, label: `100% in ${subjects[id].name} all week` };
-          break;
+          return { reason: 'perfect-subject', subject: id, label: `100% in ${subjects[id].name} all week` };
         }
       }
     }
+    return null;
+  }
+
+  let runGot = 0, runOut = 0; // running average across all weeks so far
+  for (const week of Object.values(byWeek).sort((a, b) => a.weekStart.localeCompare(b.weekStart))) {
+    week.baseMin = week.lessons.reduce((t, l) => t + l.minutes, 0);
+    week.bonus = null;
+    // Weekly bonus: every planned lesson done (Mon-Fri), with a running average of 75% or more.
+    const weekDays = [0, 1, 2, 3, 4].map(i => addDays(week.weekStart, i));
+    const planned = weekDays.reduce((t, d) => t + subjectsOn(d).length * PER_DAY, 0);
+    const scored = week.lessons.filter(l => !l.writing);
+    const got = scored.reduce((t, l) => t + l.score, 0), out = scored.reduce((t, l) => t + l.total, 0);
+    runGot += got; runOut += out;
+    week.progress = { planned, done: week.lessons.length, weekAvg: out ? got / out : null, avg: runOut ? runGot / runOut : null };
+    const allDone = planned > 0 && weekDays.every(d => subjectsOn(d).every(id => (week.days[d] ?? []).filter(r => r.subject === id).length >= PER_DAY));
+    if (week.weekStart >= NEW_RULE_FROM && allDone && week.progress.avg >= WEEK_AVG)
+      week.bonus = { reason: 'full-week', label: `every lesson done, with a ${Math.round(week.progress.avg * 100)}% running average` };
+    if (!week.bonus && week.weekStart <= OLD_RULE_UNTIL) week.bonus = oldBonus(week);
     week.bonusMin = week.bonus ? BONUS_MIN : 0;
     week.totalMin = week.baseMin + week.bonusMin;
   }
